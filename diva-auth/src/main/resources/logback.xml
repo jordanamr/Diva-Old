@@ -1,0 +1,42 @@
+<configuration>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <filter class="fr.aquazus.diva.auth.logging.DebugFilter" />
+        <encoder>
+            <pattern>%d{HH:mm:ss} %level %logger{24} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="FILE-AUTH" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <filter class="fr.aquazus.diva.auth.logging.DebugFilter" />
+        <file>logs/auth.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>logs/auth.%d{dd-MM-yyyy}.log</fileNamePattern>
+            <maxHistory>7</maxHistory>
+            <totalSizeCap>256MB</totalSizeCap>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{d/M/Y HH:mm:ss.SSS} [%thread] %level %logger{35} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="FILE-AUTH-ERROR" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>ERROR</level>
+        </filter>
+        <file>logs/error/auth-error.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>logs/error/auth-error.%d{dd-MM-yyyy}.log</fileNamePattern>
+            <maxHistory>7</maxHistory>
+            <totalSizeCap>256MB</totalSizeCap>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{d/M/Y HH:mm:ss.SSS} [%thread] %level %logger{35} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <root level="DEBUG">
+        <appender-ref ref="STDOUT" />
+        <appender-ref ref="FILE-AUTH" />
+        <appender-ref ref="FILE-AUTH-ERROR" />
+    </root>
+</configuration>

@@ -9,6 +9,8 @@
 
     <properties>
         <lombok.version>1.18.4</lombok.version>
+        <slf4j.version>1.7.25</slf4j.version>
+        <logback.version>1.2.3</logback.version>
         <simplenet.version>1.2.6</simplenet.version>
 
         <maven.compiler.source>11</maven.compiler.source>
