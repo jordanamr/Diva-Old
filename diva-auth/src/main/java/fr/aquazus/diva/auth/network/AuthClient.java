@@ -72,6 +72,7 @@ public class AuthClient implements ProtocolHandler {
                     sendProtocolMessage(new AccountLoginErrorMessage(AccountLoginErrorMessage.Type.BAD_VERSION, ProtocolHandler.version));
                     return false;
                 }
+                state = State.WAIT_CREDENTIALS;
                 return true;
         }
 
