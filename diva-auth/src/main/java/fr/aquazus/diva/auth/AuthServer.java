@@ -22,7 +22,7 @@ public class AuthServer {
         AuthServer.getInstance().start();
     }
 
-    public static boolean debug = false;
+    public static boolean debug = true;
     private List<AuthClient> clients;
 
     private void start() {

@@ -25,6 +25,7 @@ public @Data class AccountLoginErrorMessage extends ProtocolMessage {
     }
 
     public enum Type {
+        BAD_LOGIN('E'),
         CONNECT_NOT_FINISHED('n'), //Won't implement
         ALREADY_LOGGED('a'), //TODO Implement
         ALREADY_LOGGED_GAME_SERVER('c'), //TODO Implement
