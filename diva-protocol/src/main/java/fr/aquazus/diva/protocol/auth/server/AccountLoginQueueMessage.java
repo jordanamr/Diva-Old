@@ -14,7 +14,7 @@ public @Data class AccountLoginQueueMessage extends ProtocolMessage {
     private int queueId;
 
     public AccountLoginQueueMessage() {
-        this.position = 1;
+        this.position = 0;
         this.p2pQueue = 0;
         this.f2pQueue = 0;
         this.subscriber = true;

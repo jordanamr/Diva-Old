@@ -1,5 +1,6 @@
 package fr.aquazus.diva.auth.network;
 
+import fr.aquazus.diva.auth.AuthServer;
 import fr.aquazus.diva.protocol.ProtocolHandler;
 import fr.aquazus.diva.protocol.ProtocolMessage;
 import fr.aquazus.diva.protocol.auth.server.AccountLoginErrorMessage;
@@ -18,12 +19,14 @@ import java.util.Arrays;
 @Slf4j
 public class AuthClient implements ProtocolHandler {
 
+    private final AuthServer server;
     private final Client netClient;
     private final String ip;
     private String authKey;
     private State state;
 
-    public AuthClient(Client netClient, String ip) {
+    public AuthClient(AuthServer server, Client netClient, String ip) {
+        this.server = server;
         this.netClient = netClient;
         this.ip = ip;
         this.state = State.INITIALIZING;
@@ -72,7 +75,8 @@ public class AuthClient implements ProtocolHandler {
             case WAIT_VERSION:
                 if (!packet.equals(ProtocolHandler.version)) {
                     sendProtocolMessage(new AccountLoginErrorMessage(AccountLoginErrorMessage.Type.BAD_VERSION, ProtocolHandler.version));
-                    return false;
+                    disconnect("Wrong client version", packet);
+                    return true;
                 }
                 state = State.WAIT_CREDENTIALS;
                 return true;
@@ -80,11 +84,12 @@ public class AuthClient implements ProtocolHandler {
                 state = State.LOGGING_IN;
                 String[] extraData = packet.split("\n");
                 String username = extraData[0];
-                String obfPassword = extraData[1].substring(2);
-                Packet.builder().putBytes("M013".getBytes()).putByte(0).writeAndFlush(netClient);
+                String password = extraData[1];
+                if (password.startsWith("#1")) password = server.getCipher().decodePassword(password, authKey);
+
+                //Packet.builder().putBytes("M013".getBytes()).putByte(0).writeAndFlush(netClient);
                 //Packet.builder().putBytes("ATE".getBytes()).putByte(0).writeAndFlush(netClient);
                 return false;
-                //state = State.LOGGING_IN;
                 //sendProtocolMessage(new AccountLoginErrorMessage(AccountLoginErrorMessage.Type.CHOOSE_NICKNAME));
                 //return true;
         }

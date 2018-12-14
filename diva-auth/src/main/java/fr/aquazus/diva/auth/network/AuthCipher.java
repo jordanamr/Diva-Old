@@ -14,10 +14,9 @@ public class AuthCipher {
         StringBuilder builder = new StringBuilder();
         for (int i = 0; i < password.length(); i += 2) {
             int kChar = (int) key.charAt((i / 2));
-            int j = (64 + zkArray.indexOf(password.charAt(i))) - kChar;
-            int k = (64 + zkArray.indexOf(password.charAt(i + 1))) - kChar;
-            if (k < 0) k += 64;
-            builder.append((char) (16 * j + k));
+            int part1 = (64 + zkArray.indexOf(password.charAt(i))) - kChar;
+            int part2 = (64 + zkArray.indexOf(password.charAt(i + 1))) - kChar;
+            builder.append((char) (16 * part1 + (part2 < 0 ? part2 + 64 : part2)));
         }
         return builder.toString();
     }

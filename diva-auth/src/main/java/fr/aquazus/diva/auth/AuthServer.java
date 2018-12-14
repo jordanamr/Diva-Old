@@ -1,6 +1,8 @@
 package fr.aquazus.diva.auth;
 
+import fr.aquazus.diva.auth.network.AuthCipher;
 import fr.aquazus.diva.auth.network.AuthClient;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import simplenet.Server;
 
@@ -23,11 +25,16 @@ public class AuthServer {
     }
 
     public static boolean debug = true;
-    private List<AuthClient> clients;
+    private final List<AuthClient> clients;
+    @Getter
+    private final AuthCipher cipher;
+
+    private AuthServer() {
+        clients = Collections.synchronizedList(new ArrayList<>());
+        cipher = new AuthCipher();
+    }
 
     private void start() {
-        clients = Collections.synchronizedList(new ArrayList<>());
-
         Server netServer = new Server(2048);
         netServer.onConnect(netClient -> {
             String clientIp;
@@ -39,7 +46,7 @@ public class AuthServer {
                 return;
             }
             log.info("[" + clientIp + "] connected!");
-            this.clients.add(new AuthClient(netClient, clientIp));
+            this.clients.add(new AuthClient(this, netClient, clientIp));
         });
         netServer.bind("127.0.0.1", 4444);
     }
