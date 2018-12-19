@@ -35,7 +35,7 @@ public class AuthServer {
     }
 
     private void start() {
-        Server netServer = new Server(2048);
+        Server netServer = new Server(1024);
         netServer.onConnect(netClient -> {
             String clientIp;
             try {
