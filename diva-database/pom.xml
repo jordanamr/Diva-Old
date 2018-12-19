@@ -55,7 +55,7 @@
                                     <records>false</records>
                                 </generate>
                                 <target>
-                                    <packageName>fr.aquazus.diva.database</packageName>
+                                    <packageName>fr.aquazus.diva.database.generated</packageName>
                                     <directory>target/generated-sources</directory>
                                 </target>
                             </generator>

@@ -11,8 +11,6 @@ import simplenet.Client;
 import simplenet.packet.Packet;
 
 import java.io.ByteArrayOutputStream;
-import java.io.OutputStreamWriter;
-import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
@@ -64,7 +62,7 @@ public class AuthClient implements ProtocolHandler {
         }
         this.log("disconnected!" + (reason.length != 0 ? " " + Arrays.toString(reason) : ""));
         state = State.DISCONNECTED;
-        netClient.close();
+        if (netClient.getChannel().isOpen()) netClient.close();
     }
 
     @Override
@@ -118,29 +116,15 @@ public class AuthClient implements ProtocolHandler {
 
     private void sendProtocolMessage(ProtocolMessage message) {
         try {
-            String packet = new String(message.serialize().getBytes(), StandardCharsets.UTF_8);
-            StringReader reader = new StringReader(packet);
-            ByteArrayOutputStream buffer = new ByteArrayOutputStream(2048);
-            OutputStreamWriter writer = new OutputStreamWriter(buffer, StandardCharsets.UTF_8);
-            char[] cbuf = new char[1024];
-            byte[] tempBuf;
-            int len;
-            while ((len = reader.read(cbuf, 0, cbuf.length)) > 0) {
-                writer.write(cbuf, 0, len);
-                writer.flush();
-                if (buffer.size() >= 1024) {
-                    tempBuf = buffer.toByteArray();
-                    Packet.builder().putBytes(buffer.toByteArray()).writeAndFlush(netClient);
-                    buffer.reset();
-                    if (tempBuf.length > 1024) {
-                        buffer.write(tempBuf, 1024, tempBuf.length - 1024);
-                    }
-                }
+            byte[] packet = (message.serialize() + "\0").getBytes(StandardCharsets.UTF_8);
+            this.log("--> " + message.serialize());
+            for (int bound = 0; bound < packet.length; bound += 1024) {
+                int end = Math.min(packet.length, bound + 1024);
+                Packet.builder().putBytes(Arrays.copyOfRange(packet, bound, end)).writeAndFlush(netClient);
             }
-            this.log("--> " + packet);
-            Packet.builder().putBytes(buffer.toByteArray()).putByte(0).writeAndFlush(netClient);
         } catch (Exception ex) {
             log.error("An error occurred while splitting a packet", ex);
+            disconnect("Packet splitting exception");
         }
     }
 
