@@ -43,7 +43,7 @@ public class AuthClient implements ProtocolHandler {
                 stream.reset();
                 this.log("<-- " + packet);
                 if (state != State.DISCONNECTED && netClient.getChannel().isOpen() && !handlePacket(packet)) {
-                    disconnect("Malformed or unimplemented packet");
+                    disconnect("Malformed or unimplemented packet", packet);
                 }
                 return;
             }
@@ -56,7 +56,7 @@ public class AuthClient implements ProtocolHandler {
         sendProtocolMessage(hc);
     }
 
-    public void disconnect(String... reason) {
+    private void disconnect(String... reason) {
         if (state == State.DISCONNECTED) {
             return;
         }
@@ -115,12 +115,16 @@ public class AuthClient implements ProtocolHandler {
     }
 
     private void sendProtocolMessage(ProtocolMessage message) {
+        sendPacket(message.serialize());
+    }
+
+    private void sendPacket(String packet) {
         try {
-            byte[] packet = (message.serialize() + "\0").getBytes(StandardCharsets.UTF_8);
-            this.log("--> " + message.serialize());
-            for (int bound = 0; bound < packet.length; bound += 1024) {
-                int end = Math.min(packet.length, bound + 1024);
-                Packet.builder().putBytes(Arrays.copyOfRange(packet, bound, end)).writeAndFlush(netClient);
+            byte[] data = (packet + "\0").getBytes(StandardCharsets.UTF_8);
+            this.log("--> " + packet);
+            for (int bound = 0; bound < data.length; bound += 1024) {
+                int end = Math.min(data.length, bound + 1024);
+                Packet.builder().putBytes(Arrays.copyOfRange(data, bound, end)).writeAndFlush(netClient);
             }
         } catch (Exception ex) {
             log.error("An error occurred while splitting a packet", ex);
