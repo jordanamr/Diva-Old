@@ -126,6 +126,8 @@ public class AuthClient implements ProtocolHandler {
                     return true;
                 }
                 server.getDatabase().getDsl().update(ACCOUNTS).set(ACCOUNTS.NICKNAME, packet).where(ACCOUNTS.ID.eq(accountId)).execute();
+                //TODO Next
+                return false;
         }
 
         switch (packet.charAt(0)) {
