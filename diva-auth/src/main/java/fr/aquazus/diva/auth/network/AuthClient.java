@@ -1,6 +1,7 @@
 package fr.aquazus.diva.auth.network;
 
 import fr.aquazus.diva.auth.AuthServer;
+import fr.aquazus.diva.database.generated.auth.tables.pojos.Accounts;
 import fr.aquazus.diva.protocol.ProtocolHandler;
 import fr.aquazus.diva.protocol.ProtocolMessage;
 import fr.aquazus.diva.protocol.auth.server.AccountLoginErrorMessage;
@@ -14,6 +15,9 @@ import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
+import static fr.aquazus.diva.database.generated.auth.Tables.ACCOUNTS;
+import static fr.aquazus.diva.protocol.auth.server.AccountLoginErrorMessage.Type;
+
 @Slf4j
 public class AuthClient implements ProtocolHandler {
 
@@ -22,6 +26,8 @@ public class AuthClient implements ProtocolHandler {
     private final String ip;
     private String authKey;
     private State state;
+    private int accountId;
+    private String accountUsername;
 
     public AuthClient(AuthServer server, Client netClient, String ip) {
         this.server = server;
@@ -72,7 +78,7 @@ public class AuthClient implements ProtocolHandler {
         switch (state) {
             case WAIT_VERSION:
                 if (!packet.equals(ProtocolHandler.version)) {
-                    sendProtocolMessage(new AccountLoginErrorMessage(AccountLoginErrorMessage.Type.BAD_VERSION, ProtocolHandler.version));
+                    sendProtocolMessage(new AccountLoginErrorMessage(Type.BAD_VERSION, ProtocolHandler.version));
                     disconnect("Wrong client version", packet);
                     return true;
                 }
@@ -80,16 +86,46 @@ public class AuthClient implements ProtocolHandler {
                 return true;
             case WAIT_CREDENTIALS:
                 state = State.LOGGING_IN;
+                if (packet.equals("Af")) break;
+                if (!packet.contains("\n")) return false;
                 String[] extraData = packet.split("\n");
                 String username = extraData[0];
                 String password = extraData[1];
-                if (password.startsWith("#1")) password = server.getCipher().decodePassword(password, authKey);
-
-                //Packet.builder().putBytes("M013".getBytes()).putByte(0).writeAndFlush(netClient);
-                //Packet.builder().putBytes("ATE".getBytes()).putByte(0).writeAndFlush(netClient);
+                if (username == null || username.isEmpty() || password == null || password.isEmpty()) return false;
+                if (!password.startsWith("#1")) return false;
+                password = server.getCipher().decodePassword(password, authKey);
+                Accounts accountPojo = server.getDatabase().getAccountsDao().fetchOneByUsername(username);
+                if (accountPojo == null) {
+                    sendProtocolMessage(new AccountLoginErrorMessage(Type.BAD_LOGIN));
+                    disconnect("Unknown username", username);
+                    return true;
+                }
+                if (!password.equals(accountPojo.getPassword())) {
+                    sendProtocolMessage(new AccountLoginErrorMessage(Type.BAD_LOGIN));
+                    disconnect("Wrong password", username);
+                    return true;
+                }
+                this.accountId = accountPojo.getId();
+                this.accountUsername = accountPojo.getUsername();
+                if (accountPojo.getNickname() == null) {
+                    sendProtocolMessage(new AccountLoginErrorMessage(Type.CHOOSE_NICKNAME));
+                    state = State.WAIT_NICKNAME;
+                    return true;
+                }
                 return false;
-                //sendProtocolMessage(new AccountLoginErrorMessage(AccountLoginErrorMessage.Type.CHOOSE_NICKNAME));
-                //return true;
+            case WAIT_NICKNAME:
+                if (packet.equals("Af")) break;
+                if (packet.length() < 3 || packet.length() > 20 ||
+                        packet.equalsIgnoreCase(this.accountUsername) ||
+                        packet.matches("^.*[^a-zA-Z0-9-].*$") ||
+                        packet.matches(".*--.*") ||
+                        packet.startsWith("-") || packet.endsWith("-") ||
+                        Arrays.stream(server.getForbiddenNames()).anyMatch(packet.toLowerCase()::contains) ||
+                        server.getDatabase().getAccountsDao().fetchOneByNickname(packet) != null) {
+                    sendProtocolMessage(new AccountLoginErrorMessage(Type.NICKNAME_TAKEN));
+                    return true;
+                }
+                server.getDatabase().getDsl().update(ACCOUNTS).set(ACCOUNTS.NICKNAME, packet).where(ACCOUNTS.ID.eq(accountId)).execute();
         }
 
         switch (packet.charAt(0)) {
@@ -100,9 +136,8 @@ public class AuthClient implements ProtocolHandler {
                         sendProtocolMessage(new AccountLoginQueueMessage());
                         return true;
                 }
-            default:
-                return false;
         }
+        return false;
     }
 
     private void log(String message) {
@@ -137,6 +172,7 @@ public class AuthClient implements ProtocolHandler {
         WAIT_VERSION,
         WAIT_CREDENTIALS,
         LOGGING_IN,
+        WAIT_NICKNAME,
         SELECT_SERVER,
         SELECT_CHARACTER,
         DISCONNECTED

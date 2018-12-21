@@ -1,5 +1,6 @@
 package fr.aquazus.diva.auth;
 
+import fr.aquazus.diva.auth.database.AuthDatabase;
 import fr.aquazus.diva.auth.network.AuthCipher;
 import fr.aquazus.diva.auth.network.AuthClient;
 import lombok.Getter;
@@ -28,13 +29,19 @@ public class AuthServer {
     private final List<AuthClient> clients;
     @Getter
     private final AuthCipher cipher;
+    @Getter
+    private AuthDatabase database;
+    @Getter
+    private String[] forbiddenNames = {"xelor", "iop", "feca", "eniripsa", "sadida", "ecaflip", "enutrof", "pandawa", "sram", "cra", "osamodas", "sacrieur", "drop", "mule", "admin", "ankama", "dofus", "staff", "moderateur"};
 
     private AuthServer() {
         clients = Collections.synchronizedList(new ArrayList<>());
         cipher = new AuthCipher();
+        database = new AuthDatabase("127.0.0.1", "diva", "test", "diva_auth", 100);
     }
 
     private void start() {
+        database.connect();
         Server netServer = new Server(1024);
         netServer.onConnect(netClient -> {
             String clientIp;

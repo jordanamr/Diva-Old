@@ -49,13 +49,14 @@
                                     <inputSchema>${db.auth}</inputSchema>
                                 </database>
                                 <generate>
+                                    <daos>true</daos>
                                     <deprecated>false</deprecated>
                                     <instanceFields>true</instanceFields>
-                                    <pojos>false</pojos>
+                                    <pojos>true</pojos>
                                     <records>false</records>
                                 </generate>
                                 <target>
-                                    <packageName>fr.aquazus.diva.database.generated</packageName>
+                                    <packageName>fr.aquazus.diva.database.generated.auth</packageName>
                                     <directory>target/generated-sources</directory>
                                 </target>
                             </generator>
