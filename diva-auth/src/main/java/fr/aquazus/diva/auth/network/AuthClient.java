@@ -2,21 +2,26 @@ package fr.aquazus.diva.auth.network;
 
 import fr.aquazus.diva.auth.AuthServer;
 import fr.aquazus.diva.database.generated.auth.tables.pojos.Accounts;
+import fr.aquazus.diva.database.generated.auth.tables.pojos.Characters;
+import fr.aquazus.diva.database.generated.auth.tables.pojos.Servers;
 import fr.aquazus.diva.protocol.ProtocolHandler;
 import fr.aquazus.diva.protocol.ProtocolMessage;
-import fr.aquazus.diva.protocol.auth.server.AccountLoginErrorMessage;
-import fr.aquazus.diva.protocol.auth.server.AccountLoginQueueMessage;
-import fr.aquazus.diva.protocol.auth.server.HelloConnectMessage;
+import fr.aquazus.diva.protocol.auth.server.*;
 import lombok.extern.slf4j.Slf4j;
 import simplenet.Client;
 import simplenet.packet.Packet;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 
 import static fr.aquazus.diva.database.generated.auth.Tables.ACCOUNTS;
 import static fr.aquazus.diva.protocol.auth.server.AccountLoginErrorMessage.Type;
+import static fr.aquazus.diva.protocol.auth.server.AccountLoginCommunityMessage.Community;
+import static fr.aquazus.diva.protocol.auth.server.AccountLoginServersMessage.*;
 
 @Slf4j
 public class AuthClient implements ProtocolHandler {
@@ -28,6 +33,9 @@ public class AuthClient implements ProtocolHandler {
     private State state;
     private int accountId;
     private String accountUsername;
+    private String accountNickname;
+    private String accountSecretQuestion;
+    private int accountSubscriptionTime;
 
     public AuthClient(AuthServer server, Client netClient, String ip) {
         this.server = server;
@@ -107,12 +115,16 @@ public class AuthClient implements ProtocolHandler {
                 }
                 this.accountId = accountPojo.getId();
                 this.accountUsername = accountPojo.getUsername();
-                if (accountPojo.getNickname() == null) {
+                this.accountSecretQuestion = accountPojo.getSecretQuestion();
+                this.accountSubscriptionTime = accountPojo.getRemainingSubscription();
+                if (accountPojo.getNickname() == null || accountPojo.getNickname().isBlank()) {
                     sendProtocolMessage(new AccountLoginErrorMessage(Type.CHOOSE_NICKNAME));
                     state = State.WAIT_NICKNAME;
                     return true;
                 }
-                return false;
+                this.accountNickname = accountPojo.getNickname();
+                sendAccountData();
+                return true;
             case WAIT_NICKNAME:
                 if (packet.equals("Af")) break;
                 if (packet.length() < 3 || packet.length() > 20 ||
@@ -120,26 +132,57 @@ public class AuthClient implements ProtocolHandler {
                         packet.matches("^.*[^a-zA-Z0-9-].*$") ||
                         packet.matches(".*--.*") ||
                         packet.startsWith("-") || packet.endsWith("-") ||
+                        packet.chars().filter(ch -> ch == '-').count() > 2 ||
                         Arrays.stream(server.getForbiddenNames()).anyMatch(packet.toLowerCase()::contains) ||
                         server.getDatabase().getAccountsDao().fetchOneByNickname(packet) != null) {
                     sendProtocolMessage(new AccountLoginErrorMessage(Type.NICKNAME_TAKEN));
                     return true;
                 }
                 server.getDatabase().getDsl().update(ACCOUNTS).set(ACCOUNTS.NICKNAME, packet).where(ACCOUNTS.ID.eq(accountId)).execute();
-                //TODO Next
-                return false;
+                this.accountNickname = packet;
+                state = State.LOGGING_IN;
+                sendAccountData();
+                return true;
         }
 
         switch (packet.charAt(0)) {
             case 'A':
                 switch (packet.charAt(1)) {
                     case 'f':
-                        //TODO File d'attente
-                        sendProtocolMessage(new AccountLoginQueueMessage());
+                        sendProtocolMessage(new AccountLoginQueueMessage()); //TODO File d'attente
+                        return true;
+                    case 'x':
+                        HashMap<Integer, Integer> characterList = new HashMap<>();
+                        for (Characters characters : server.getDatabase().getCharactersDao().fetchByAccountId(accountId)) {
+                            if (characterList.containsKey(characters.getServer())) {
+                                characterList.put(characters.getServer(), characterList.get(characters.getServer()) + 1);
+                            } else {
+                                characterList.put(characters.getServer(), 1);
+                            }
+                        }
+                        sendProtocolMessage(new AccountLoginDataMessage(accountSubscriptionTime, characterList));
+                        state = State.SELECT_SERVER;
                         return true;
                 }
         }
         return false;
+    }
+
+    private void sendAccountData() {
+        sendProtocolMessage(new AccountLoginNicknameMessage(accountNickname));
+        sendProtocolMessage(new AccountLoginCommunityMessage(Community.FRENCH));
+
+        AccountLoginServersMessage serversMessage = new AccountLoginServersMessage();
+        List<AccountLoginServersMessage.Server> serverList = new ArrayList<>();
+        for (Servers servers : server.getDatabase().getServersDao().findAll()) {
+            serverList.add(serversMessage.new Server(servers.getId(),
+                    ServerState.valueOf(servers.getStatus().intValue()),
+                    ServerPopulation.valueOf(servers.getPopulation().intValue()), servers.getP2p().intValue() == 1));
+        }
+        serversMessage.setServerList(serverList);
+        sendProtocolMessage(serversMessage);
+        sendProtocolMessage(new AccountLoginRightsMessage(true));
+        sendProtocolMessage(new AccountLoginQuestionMessage(this.accountSecretQuestion));
     }
 
     private void log(String message) {

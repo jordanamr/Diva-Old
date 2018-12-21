@@ -1,5 +1,6 @@
 package fr.aquazus.diva.protocol;
 
+
 public abstract class ProtocolMessage {
 
     public String serialize() {
