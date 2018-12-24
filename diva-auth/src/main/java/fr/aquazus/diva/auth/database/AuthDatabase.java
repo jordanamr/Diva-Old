@@ -40,6 +40,7 @@ public class AuthDatabase extends DivaDatabase {
             this.ranksDao = new RanksDao(dsl.configuration());
             this.serversDao = new ServersDao(dsl.configuration());
             this.charactersDao = new CharactersDao(dsl.configuration());
+            log.info("Successfully connected to database.");
         } catch (SQLException ex) {
             log.error("A fatal error occured while connecting to the SQL server", ex);
             System.exit(-1);

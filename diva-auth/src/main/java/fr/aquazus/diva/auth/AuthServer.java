@@ -3,13 +3,13 @@ package fr.aquazus.diva.auth;
 import fr.aquazus.diva.auth.database.AuthDatabase;
 import fr.aquazus.diva.auth.network.AuthCipher;
 import fr.aquazus.diva.auth.network.AuthClient;
+import fr.aquazus.diva.database.generated.auth.tables.pojos.Servers;
+import fr.aquazus.diva.protocol.auth.server.AccountLoginServersMessage;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import simplenet.Server;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 @Slf4j
 public class AuthServer {
@@ -26,6 +26,7 @@ public class AuthServer {
     }
 
     private AuthConfiguration config;
+    @Getter
     private final List<AuthClient> clients;
     @Getter
     private final AuthCipher cipher;
@@ -33,12 +34,15 @@ public class AuthServer {
     private AuthDatabase database;
     @Getter
     private String[] forbiddenNames;
+    @Getter
+    private Map<Integer, AccountLoginServersMessage.Server> serversCache;
 
     private AuthServer() {
         config = new AuthConfiguration();
         clients = Collections.synchronizedList(new ArrayList<>());
         cipher = new AuthCipher();
         forbiddenNames = new String[] {"xelor", "iop", "feca", "eniripsa", "sadida", "ecaflip", "enutrof", "pandawa", "sram", "cra", "osamodas", "sacrieur", "drop", "mule", "admin", "ankama", "dofus", "staff", "moderateur"};
+        serversCache = Collections.synchronizedMap(new HashMap<>());
     }
 
     private void start() {
@@ -52,7 +56,12 @@ public class AuthServer {
         database = new AuthDatabase(config.getDatabaseIp() + ":" + config.getDatabasePort(), config.getDatabaseUsername(),
                 config.getDatabasePassword(), config.getDatabaseName(), config.getDatabasePool());
         database.connect();
-        log.info("Successfully connected to database.");
+        log.info("Initializing GameServers list...");
+        for (Servers servers : database.getServersDao().findAll()) {
+            serversCache.put(servers.getId(), new AccountLoginServersMessage.Server(servers.getId(), AccountLoginServersMessage.ServerState.OFFLINE,
+                    AccountLoginServersMessage.ServerPopulation.valueOf(servers.getPopulation().intValue()), servers.getP2p().intValue() == 1));
+        }
+        log.info(serversCache.size() + " GameServers detected.");
         listen();
     }
 

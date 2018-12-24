@@ -80,6 +80,7 @@ public class AuthClient implements ProtocolHandler {
         this.log("disconnected!" + (reason.length != 0 ? " " + Arrays.toString(reason) : ""));
         state = State.DISCONNECTED;
         if (netClient.getChannel().isOpen()) netClient.close();
+        server.getClients().remove(this);
     }
 
     @Override
@@ -193,15 +194,7 @@ public class AuthClient implements ProtocolHandler {
     private void sendAccountData() {
         sendProtocolMessage(new AccountLoginNicknameMessage(this.accountNickname));
         sendProtocolMessage(new AccountLoginCommunityMessage(this.community));
-
-        AccountLoginServersMessage serversMessage = new AccountLoginServersMessage();
-        List<AccountLoginServersMessage.Server> serverList = new ArrayList<>();
-        for (Servers servers : server.getDatabase().getServersDao().findAll()) {
-            serverList.add(serversMessage.new Server(servers.getId(), ServerState.OFFLINE,
-                    ServerPopulation.valueOf(servers.getPopulation().intValue()), servers.getP2p().intValue() == 1));
-        }
-        serversMessage.setServerList(serverList);
-        sendProtocolMessage(serversMessage);
+        sendProtocolMessage(new AccountLoginServersMessage(new ArrayList<>(server.getServersCache().values())));
         sendProtocolMessage(new AccountLoginRightsMessage(this.hasRights));
         sendProtocolMessage(new AccountLoginQuestionMessage(this.accountSecretQuestion));
     }

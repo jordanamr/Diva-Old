@@ -12,6 +12,10 @@ public @Data class AccountLoginServersMessage extends ProtocolMessage {
 
     private List<Server> serverList;
 
+    public AccountLoginServersMessage(List<Server> serverList) {
+        this.serverList = serverList;
+    }
+
     @Override
     public String serialize() {
         StringBuilder builder = new StringBuilder("AH");
@@ -29,7 +33,7 @@ public @Data class AccountLoginServersMessage extends ProtocolMessage {
         return builder.toString();
     }
 
-    public @Data class Server {
+    public static @Data class Server {
         private int id;
         private ServerState state;
         private ServerPopulation population;
