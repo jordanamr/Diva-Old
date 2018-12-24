@@ -150,44 +150,42 @@ public class AuthClient implements ProtocolHandler {
                 return true;
         }
 
-        switch (packet.charAt(0)) {
-            case 'A':
-                switch (packet.charAt(1)) {
-                    case 'f':
-                        sendProtocolMessage(new AccountLoginQueueMessage()); //TODO File d'attente
-                        return true;
-                    case 'x':
-                        HashMap<Integer, Integer> characterList = new HashMap<>();
-                        for (Characters characters : server.getDatabase().getCharactersDao().fetchByAccountId(accountId)) {
-                            if (characterList.containsKey(characters.getServer())) {
-                                characterList.put(characters.getServer(), characterList.get(characters.getServer()) + 1);
-                            } else {
-                                characterList.put(characters.getServer(), 1);
-                            }
-                        }
-                        sendProtocolMessage(new AccountLoginDataMessage(accountSubscriptionTime, characterList));
-                        state = State.SELECT_SERVER;
-                        return true;
-                    case 'F':
-                        AccountLoginSearchResultMessage result = new AccountLoginSearchResultMessage();
-                        String nickname = new AccountLoginSearchMessage().deserialize(packet).getNickname();
-                        Accounts friendPojo = server.getDatabase().getAccountsDao().fetchOneByNickname(nickname);
-                        if (friendPojo == null) {
-                            sendProtocolMessage(result);
-                            return true;
-                        }
-                        HashMap<Integer, Integer> characterCount = new HashMap<>();
-                        for (Characters characters : server.getDatabase().getCharactersDao().fetchByAccountId(friendPojo.getId())) {
-                            if (characterCount.containsKey(characters.getServer())) {
-                                characterCount.put(characters.getServer(), characterCount.get(characters.getServer()) + 1);
-                            } else {
-                                characterCount.put(characters.getServer(), 1);
-                            }
-                        }
-                        result.setCharacterCount(characterCount);
-                        sendProtocolMessage(result);
-                        return true;
+        if (packet.charAt(0) != 'A') return false;
+        switch (packet.charAt(1)) {
+            case 'f':
+                sendProtocolMessage(new AccountLoginQueueMessage()); //TODO File d'attente
+                return true;
+            case 'x':
+                HashMap<Integer, Integer> characterList = new HashMap<>();
+                for (Characters characters : server.getDatabase().getCharactersDao().fetchByAccountId(accountId)) {
+                    if (characterList.containsKey(characters.getServer())) {
+                        characterList.put(characters.getServer(), characterList.get(characters.getServer()) + 1);
+                    } else {
+                        characterList.put(characters.getServer(), 1);
+                    }
                 }
+                sendProtocolMessage(new AccountLoginDataMessage(accountSubscriptionTime, characterList));
+                state = State.SELECT_SERVER;
+                return true;
+            case 'F':
+                AccountLoginSearchResultMessage result = new AccountLoginSearchResultMessage();
+                String nickname = new AccountLoginSearchMessage().deserialize(packet).getNickname();
+                Accounts friendPojo = server.getDatabase().getAccountsDao().fetchOneByNickname(nickname);
+                if (friendPojo == null) {
+                    sendProtocolMessage(result);
+                    return true;
+                }
+                HashMap<Integer, Integer> characterCount = new HashMap<>();
+                for (Characters characters : server.getDatabase().getCharactersDao().fetchByAccountId(friendPojo.getId())) {
+                    if (characterCount.containsKey(characters.getServer())) {
+                        characterCount.put(characters.getServer(), characterCount.get(characters.getServer()) + 1);
+                    } else {
+                        characterCount.put(characters.getServer(), 1);
+                    }
+                }
+                result.setCharacterCount(characterCount);
+                sendProtocolMessage(result);
+                return true;
         }
         return false;
     }
