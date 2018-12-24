@@ -219,7 +219,6 @@ public class AuthClient implements ProtocolHandler {
         LOGGING_IN,
         WAIT_NICKNAME,
         SELECT_SERVER,
-        SELECT_CHARACTER,
         DISCONNECTED
     }
 }
