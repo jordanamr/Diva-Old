@@ -207,7 +207,7 @@ public class AuthClient implements ProtocolHandler {
     }
 
     private void log(String message) {
-        String format = "[" + ip + "] " + message;
+        String format = "[" + ip + (accountUsername == null ? "" : " - " + accountUsername) + "] " + message;
         if (message.startsWith("-->") || message.startsWith("<--")) {
             log.debug(format);
         } else {
