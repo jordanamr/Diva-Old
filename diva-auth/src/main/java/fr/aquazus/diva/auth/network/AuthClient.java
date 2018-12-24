@@ -36,6 +36,8 @@ public class AuthClient implements ProtocolHandler {
     private String accountNickname;
     private String accountSecretQuestion;
     private int accountSubscriptionTime;
+    private boolean hasRights;
+    private Community community;
 
     public AuthClient(AuthServer server, Client netClient, String ip) {
         this.server = server;
@@ -117,6 +119,8 @@ public class AuthClient implements ProtocolHandler {
                 this.accountUsername = accountPojo.getUsername();
                 this.accountSecretQuestion = accountPojo.getSecretQuestion();
                 this.accountSubscriptionTime = accountPojo.getRemainingSubscription();
+                this.hasRights = server.getDatabase().getRanksDao().fetchOneById(accountPojo.getRank()).getConsoleAccess().intValue() == 1;
+                this.community = AccountLoginCommunityMessage.Community.valueOf(accountPojo.getCommunity().intValue());
                 if (accountPojo.getNickname() == null || accountPojo.getNickname().isBlank()) {
                     sendProtocolMessage(new AccountLoginErrorMessage(Type.CHOOSE_NICKNAME));
                     state = State.WAIT_NICKNAME;
@@ -169,19 +173,18 @@ public class AuthClient implements ProtocolHandler {
     }
 
     private void sendAccountData() {
-        sendProtocolMessage(new AccountLoginNicknameMessage(accountNickname));
-        sendProtocolMessage(new AccountLoginCommunityMessage(Community.FRENCH));
+        sendProtocolMessage(new AccountLoginNicknameMessage(this.accountNickname));
+        sendProtocolMessage(new AccountLoginCommunityMessage(this.community));
 
         AccountLoginServersMessage serversMessage = new AccountLoginServersMessage();
         List<AccountLoginServersMessage.Server> serverList = new ArrayList<>();
         for (Servers servers : server.getDatabase().getServersDao().findAll()) {
-            serverList.add(serversMessage.new Server(servers.getId(),
-                    ServerState.valueOf(servers.getStatus().intValue()),
+            serverList.add(serversMessage.new Server(servers.getId(), ServerState.OFFLINE,
                     ServerPopulation.valueOf(servers.getPopulation().intValue()), servers.getP2p().intValue() == 1));
         }
         serversMessage.setServerList(serverList);
         sendProtocolMessage(serversMessage);
-        sendProtocolMessage(new AccountLoginRightsMessage(true));
+        sendProtocolMessage(new AccountLoginRightsMessage(this.hasRights));
         sendProtocolMessage(new AccountLoginQuestionMessage(this.accountSecretQuestion));
     }
 

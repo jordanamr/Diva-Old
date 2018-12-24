@@ -3,6 +3,9 @@ package fr.aquazus.diva.protocol.auth.server;
 import fr.aquazus.diva.protocol.ProtocolMessage;
 import lombok.Data;
 
+import java.util.Arrays;
+import java.util.Optional;
+
 public @Data
 class AccountLoginCommunityMessage extends ProtocolMessage {
 
@@ -38,6 +41,13 @@ class AccountLoginCommunityMessage extends ProtocolMessage {
 
         public int getValue() {
             return value;
+        }
+
+        public static Community valueOf(int value) {
+            Optional<Community> key = Arrays.stream(values())
+                    .filter(population -> population.value == value)
+                    .findFirst();
+            return key.orElse(null);
         }
     }
 }
