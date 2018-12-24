@@ -7,7 +7,7 @@ public abstract class ProtocolMessage {
         throw new UnsupportedOperationException();
     }
 
-    public void deserialize(String data) {
+    public ProtocolMessage deserialize(String data) {
         throw new UnsupportedOperationException();
     }
 }

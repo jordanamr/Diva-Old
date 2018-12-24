@@ -6,6 +6,7 @@ import fr.aquazus.diva.database.generated.auth.tables.pojos.Characters;
 import fr.aquazus.diva.database.generated.auth.tables.pojos.Servers;
 import fr.aquazus.diva.protocol.ProtocolHandler;
 import fr.aquazus.diva.protocol.ProtocolMessage;
+import fr.aquazus.diva.protocol.auth.client.AccountLoginSearchMessage;
 import fr.aquazus.diva.protocol.auth.server.*;
 import lombok.extern.slf4j.Slf4j;
 import simplenet.Client;
@@ -166,6 +167,25 @@ public class AuthClient implements ProtocolHandler {
                         }
                         sendProtocolMessage(new AccountLoginDataMessage(accountSubscriptionTime, characterList));
                         state = State.SELECT_SERVER;
+                        return true;
+                    case 'F':
+                        AccountLoginSearchResultMessage result = new AccountLoginSearchResultMessage();
+                        String nickname = new AccountLoginSearchMessage().deserialize(packet).getNickname();
+                        Accounts friendPojo = server.getDatabase().getAccountsDao().fetchOneByNickname(nickname);
+                        if (friendPojo == null) {
+                            sendProtocolMessage(result);
+                            return true;
+                        }
+                        HashMap<Integer, Integer> characterCount = new HashMap<>();
+                        for (Characters characters : server.getDatabase().getCharactersDao().fetchByAccountId(friendPojo.getId())) {
+                            if (characterCount.containsKey(characters.getServer())) {
+                                characterCount.put(characters.getServer(), characterCount.get(characters.getServer()) + 1);
+                            } else {
+                                characterCount.put(characters.getServer(), 1);
+                            }
+                        }
+                        result.setCharacterCount(characterCount);
+                        sendProtocolMessage(result);
                         return true;
                 }
         }
