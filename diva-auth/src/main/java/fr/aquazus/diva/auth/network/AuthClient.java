@@ -3,7 +3,6 @@ package fr.aquazus.diva.auth.network;
 import fr.aquazus.diva.auth.AuthServer;
 import fr.aquazus.diva.database.generated.auth.tables.pojos.Accounts;
 import fr.aquazus.diva.database.generated.auth.tables.pojos.Characters;
-import fr.aquazus.diva.database.generated.auth.tables.pojos.Servers;
 import fr.aquazus.diva.protocol.ProtocolHandler;
 import fr.aquazus.diva.protocol.ProtocolMessage;
 import fr.aquazus.diva.protocol.auth.client.AccountLoginSearchMessage;
@@ -17,12 +16,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 
 import static fr.aquazus.diva.database.generated.auth.Tables.ACCOUNTS;
 import static fr.aquazus.diva.protocol.auth.server.AccountLoginErrorMessage.Type;
 import static fr.aquazus.diva.protocol.auth.server.AccountLoginCommunityMessage.Community;
-import static fr.aquazus.diva.protocol.auth.server.AccountLoginServersMessage.*;
 
 @Slf4j
 public class AuthClient implements ProtocolHandler {

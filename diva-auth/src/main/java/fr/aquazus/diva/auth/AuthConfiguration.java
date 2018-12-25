@@ -14,6 +14,9 @@ public @Data class AuthConfiguration {
     protected String bindIp;
     protected int bindPort;
 
+    protected String redisIp;
+    protected int redisPort;
+
     protected String databaseIp;
     protected int databasePort;
     protected String databaseUsername;
@@ -29,6 +32,8 @@ public @Data class AuthConfiguration {
             debug = Boolean.parseBoolean(properties.getProperty("debug"));
             this.bindIp = properties.getProperty("bind.ip");
             this.bindPort = Integer.parseInt(properties.getProperty("bind.port"));
+            this.redisIp = properties.getProperty("redis.ip");
+            this.redisPort = Integer.parseInt(properties.getProperty("redis.port"));
             this.databaseIp = properties.getProperty("database.ip");
             this.databasePort = Integer.parseInt(properties.getProperty("database.port"));
             this.databaseUsername = properties.getProperty("database.username");

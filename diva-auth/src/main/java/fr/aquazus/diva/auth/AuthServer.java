@@ -3,6 +3,7 @@ package fr.aquazus.diva.auth;
 import fr.aquazus.diva.auth.database.AuthDatabase;
 import fr.aquazus.diva.auth.network.AuthCipher;
 import fr.aquazus.diva.auth.network.AuthClient;
+import fr.aquazus.diva.auth.redis.DivaRedis;
 import fr.aquazus.diva.database.generated.auth.tables.pojos.Servers;
 import fr.aquazus.diva.protocol.auth.server.AccountLoginServersMessage;
 import lombok.Getter;
@@ -36,6 +37,8 @@ public class AuthServer {
     private String[] forbiddenNames;
     @Getter
     private Map<Integer, AccountLoginServersMessage.Server> serversCache;
+    @Getter
+    private Map<Integer, String> serversIpCache;
 
     private AuthServer() {
         config = new AuthConfiguration();
@@ -43,6 +46,7 @@ public class AuthServer {
         cipher = new AuthCipher();
         forbiddenNames = new String[] {"xelor", "iop", "feca", "eniripsa", "sadida", "ecaflip", "enutrof", "pandawa", "sram", "cra", "osamodas", "sacrieur", "drop", "mule", "admin", "ankama", "dofus", "staff", "moderateur"};
         serversCache = Collections.synchronizedMap(new HashMap<>());
+        serversIpCache = Collections.synchronizedMap(new HashMap<>());
     }
 
     private void start() {
@@ -62,6 +66,9 @@ public class AuthServer {
                     AccountLoginServersMessage.ServerPopulation.valueOf(servers.getPopulation().intValue()), servers.getP2p().intValue() == 1));
         }
         log.info(serversCache.size() + " GameServers detected.");
+        log.info("Starting Redis communication...");
+        DivaRedis communication = new DivaRedis(this, config.getRedisIp(), config.getRedisPort());
+        new Thread(communication).start();
         listen();
     }
 
@@ -82,4 +89,5 @@ public class AuthServer {
         });
         netServer.bind(config.getBindIp(), config.getBindPort());
     }
+
 }
