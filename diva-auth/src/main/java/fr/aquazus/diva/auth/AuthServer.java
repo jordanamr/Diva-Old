@@ -3,7 +3,7 @@ package fr.aquazus.diva.auth;
 import fr.aquazus.diva.auth.database.AuthDatabase;
 import fr.aquazus.diva.auth.network.AuthCipher;
 import fr.aquazus.diva.auth.network.AuthClient;
-import fr.aquazus.diva.auth.redis.DivaRedis;
+import fr.aquazus.diva.auth.redis.AuthRedis;
 import fr.aquazus.diva.database.generated.auth.tables.pojos.Servers;
 import fr.aquazus.diva.protocol.auth.server.AccountLoginServersMessage;
 import lombok.Getter;
@@ -67,7 +67,7 @@ public class AuthServer {
         }
         log.info(serversCache.size() + " GameServers detected.");
         log.info("Starting Redis communication...");
-        DivaRedis communication = new DivaRedis(this, config.getRedisIp(), config.getRedisPort());
+        AuthRedis communication = new AuthRedis(this, config.getRedisIp(), config.getRedisPort());
         new Thread(communication).start();
         listen();
     }
