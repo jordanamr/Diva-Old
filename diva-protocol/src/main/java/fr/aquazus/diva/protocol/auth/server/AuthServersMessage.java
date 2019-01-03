@@ -8,11 +8,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
-public @Data class AccountLoginServersMessage extends ProtocolMessage {
+public @Data class AuthServersMessage extends ProtocolMessage {
 
     private List<Server> serverList;
 
-    public AccountLoginServersMessage(List<Server> serverList) {
+    public AuthServersMessage(List<Server> serverList) {
         this.serverList = serverList;
     }
 

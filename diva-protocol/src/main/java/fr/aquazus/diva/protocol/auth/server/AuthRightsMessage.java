@@ -3,11 +3,11 @@ package fr.aquazus.diva.protocol.auth.server;
 import fr.aquazus.diva.protocol.ProtocolMessage;
 import lombok.Data;
 
-public @Data class AccountLoginRightsMessage extends ProtocolMessage {
+public @Data class AuthRightsMessage extends ProtocolMessage {
 
     private boolean hasConsole;
 
-    public AccountLoginRightsMessage(boolean hasConsole) {
+    public AuthRightsMessage(boolean hasConsole) {
         this.hasConsole = hasConsole;
     }
 

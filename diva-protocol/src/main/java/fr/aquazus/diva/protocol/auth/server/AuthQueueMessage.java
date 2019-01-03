@@ -5,7 +5,7 @@ import lombok.Data;
 
 import java.util.Random;
 
-public @Data class AccountLoginQueueMessage extends ProtocolMessage {
+public @Data class AuthQueueMessage extends ProtocolMessage {
 
     private int position;
     private int p2pQueue;
@@ -13,7 +13,7 @@ public @Data class AccountLoginQueueMessage extends ProtocolMessage {
     private boolean subscriber;
     private int queueId;
 
-    public AccountLoginQueueMessage() {
+    public AuthQueueMessage() {
         this.position = 0;
         this.p2pQueue = 0;
         this.f2pQueue = 0;

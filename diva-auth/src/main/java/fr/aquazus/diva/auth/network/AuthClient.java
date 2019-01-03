@@ -5,7 +5,8 @@ import fr.aquazus.diva.database.generated.auth.tables.pojos.Accounts;
 import fr.aquazus.diva.database.generated.auth.tables.pojos.Characters;
 import fr.aquazus.diva.protocol.ProtocolHandler;
 import fr.aquazus.diva.protocol.ProtocolMessage;
-import fr.aquazus.diva.protocol.auth.client.AccountLoginSearchMessage;
+import fr.aquazus.diva.protocol.auth.client.AuthConnectMessage;
+import fr.aquazus.diva.protocol.auth.client.AuthSearchMessage;
 import fr.aquazus.diva.protocol.auth.server.*;
 import lombok.extern.slf4j.Slf4j;
 import simplenet.Client;
@@ -18,8 +19,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 import static fr.aquazus.diva.database.generated.auth.Tables.ACCOUNTS;
-import static fr.aquazus.diva.protocol.auth.server.AccountLoginErrorMessage.Type;
-import static fr.aquazus.diva.protocol.auth.server.AccountLoginCommunityMessage.Community;
+import static fr.aquazus.diva.protocol.auth.server.AuthCommunityMessage.Community;
 
 @Slf4j
 public class AuthClient implements ProtocolHandler {
@@ -87,7 +87,7 @@ public class AuthClient implements ProtocolHandler {
         switch (state) {
             case WAIT_VERSION:
                 if (!packet.equals(ProtocolHandler.version)) {
-                    sendProtocolMessage(new AccountLoginErrorMessage(Type.BAD_VERSION, ProtocolHandler.version));
+                    sendProtocolMessage(new AuthErrorMessage(AuthErrorMessage.Type.BAD_VERSION, ProtocolHandler.version));
                     disconnect("Wrong client version", packet);
                     return true;
                 }
@@ -105,12 +105,12 @@ public class AuthClient implements ProtocolHandler {
                 password = server.getCipher().decodePassword(password, authKey);
                 Accounts accountPojo = server.getDatabase().getAccountsDao().fetchOneByUsername(username);
                 if (accountPojo == null) {
-                    sendProtocolMessage(new AccountLoginErrorMessage(Type.BAD_LOGIN));
+                    sendProtocolMessage(new AuthErrorMessage(AuthErrorMessage.Type.BAD_LOGIN));
                     disconnect("Unknown username", username);
                     return true;
                 }
                 if (!password.equals(accountPojo.getPassword())) {
-                    sendProtocolMessage(new AccountLoginErrorMessage(Type.BAD_LOGIN));
+                    sendProtocolMessage(new AuthErrorMessage(AuthErrorMessage.Type.BAD_LOGIN));
                     disconnect("Wrong password", username);
                     return true;
                 }
@@ -119,9 +119,9 @@ public class AuthClient implements ProtocolHandler {
                 this.accountSecretQuestion = accountPojo.getSecretQuestion();
                 this.accountSubscriptionTime = accountPojo.getRemainingSubscription();
                 this.hasRights = server.getDatabase().getRanksDao().fetchOneById(accountPojo.getRank()).getConsoleAccess().intValue() == 1;
-                this.community = AccountLoginCommunityMessage.Community.valueOf(accountPojo.getCommunity().intValue());
+                this.community = AuthCommunityMessage.Community.valueOf(accountPojo.getCommunity().intValue());
                 if (accountPojo.getNickname() == null || accountPojo.getNickname().isBlank()) {
-                    sendProtocolMessage(new AccountLoginErrorMessage(Type.CHOOSE_NICKNAME));
+                    sendProtocolMessage(new AuthErrorMessage(AuthErrorMessage.Type.CHOOSE_NICKNAME));
                     state = State.WAIT_NICKNAME;
                     return true;
                 }
@@ -138,7 +138,7 @@ public class AuthClient implements ProtocolHandler {
                         packet.chars().filter(ch -> ch == '-').count() > 2 ||
                         Arrays.stream(server.getForbiddenNames()).anyMatch(packet.toLowerCase()::contains) ||
                         server.getDatabase().getAccountsDao().fetchOneByNickname(packet) != null) {
-                    sendProtocolMessage(new AccountLoginErrorMessage(Type.NICKNAME_TAKEN));
+                    sendProtocolMessage(new AuthErrorMessage(AuthErrorMessage.Type.NICKNAME_TAKEN));
                     return true;
                 }
                 server.getDatabase().getDsl().update(ACCOUNTS).set(ACCOUNTS.NICKNAME, packet).where(ACCOUNTS.ID.eq(accountId)).execute();
@@ -151,7 +151,7 @@ public class AuthClient implements ProtocolHandler {
         if (packet.charAt(0) != 'A') return false;
         switch (packet.charAt(1)) {
             case 'f':
-                sendProtocolMessage(new AccountLoginQueueMessage()); //TODO File d'attente
+                sendProtocolMessage(new AuthQueueMessage()); //TODO File d'attente
                 return true;
             case 'x':
                 HashMap<Integer, Integer> characterList = new HashMap<>();
@@ -162,12 +162,14 @@ public class AuthClient implements ProtocolHandler {
                         characterList.put(characters.getServer(), 1);
                     }
                 }
-                sendProtocolMessage(new AccountLoginDataMessage(accountSubscriptionTime, characterList));
+                sendProtocolMessage(new AuthDataMessage(accountSubscriptionTime, characterList));
                 state = State.SELECT_SERVER;
                 return true;
             case 'F':
-                AccountLoginSearchResultMessage result = new AccountLoginSearchResultMessage();
-                String nickname = new AccountLoginSearchMessage().deserialize(packet).getNickname();
+                AuthSearchMessage searchMessage = new AuthSearchMessage().deserialize(packet);
+                if (searchMessage == null) return false;
+                String nickname = searchMessage.getNickname();
+                AuthSearchResultMessage result = new AuthSearchResultMessage();
                 Accounts friendPojo = server.getDatabase().getAccountsDao().fetchOneByNickname(nickname);
                 if (friendPojo == null) {
                     sendProtocolMessage(result);
@@ -184,16 +186,29 @@ public class AuthClient implements ProtocolHandler {
                 result.setCharacterCount(characterCount);
                 sendProtocolMessage(result);
                 return true;
+            case 'X':
+                AuthConnectMessage connectMessage = new AuthConnectMessage().deserialize(packet);
+                if (connectMessage == null) return false;
+                int serverId = connectMessage.getServerId();
+                if (!server.getServersCache().containsKey(serverId)) return false;
+                AuthServersMessage.Server serverInstance = server.getServersCache().get(serverId);
+                if (serverInstance.getState() != AuthServersMessage.ServerState.ONLINE || !server.getServersIpCache().containsKey(serverId)) {
+                    sendProtocolMessage(new AuthConnectErrorMessage(AuthConnectErrorMessage.Type.NOT_AVAILABLE));
+                }
+                String ticket = server.getCipher().generateTicket();
+                server.getRedis().setTicket(serverId, ticket, ip);
+                String encryptedAddress = server.getCipher().encodeAXK(server.getServersIpCache().get(serverId));
+                sendProtocolMessage(new AuthAddressMessage(encryptedAddress, ticket));
         }
         return false;
     }
 
     private void sendAccountData() {
-        sendProtocolMessage(new AccountLoginNicknameMessage(this.accountNickname));
-        sendProtocolMessage(new AccountLoginCommunityMessage(this.community));
-        sendProtocolMessage(new AccountLoginServersMessage(new ArrayList<>(server.getServersCache().values())));
-        sendProtocolMessage(new AccountLoginRightsMessage(this.hasRights));
-        sendProtocolMessage(new AccountLoginQuestionMessage(this.accountSecretQuestion));
+        sendProtocolMessage(new AuthNicknameMessage(this.accountNickname));
+        sendProtocolMessage(new AuthCommunityMessage(this.community));
+        sendProtocolMessage(new AuthServersMessage(new ArrayList<>(server.getServersCache().values())));
+        sendProtocolMessage(new AuthRightsMessage(this.hasRights));
+        sendProtocolMessage(new AuthQuestionMessage(this.accountSecretQuestion));
     }
 
     private void log(String message) {

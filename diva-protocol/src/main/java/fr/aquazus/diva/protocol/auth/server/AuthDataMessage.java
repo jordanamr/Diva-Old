@@ -6,12 +6,12 @@ import lombok.Data;
 import java.util.HashMap;
 import java.util.Map;
 
-public @Data class AccountLoginDataMessage extends ProtocolMessage {
+public @Data class AuthDataMessage extends ProtocolMessage {
 
     private int subscriptionTime;
     private HashMap<Integer, Integer> characterList;
 
-    public AccountLoginDataMessage(int subscriptionTime, HashMap<Integer, Integer> characterList) {
+    public AuthDataMessage(int subscriptionTime, HashMap<Integer, Integer> characterList) {
         this.subscriptionTime = subscriptionTime;
         this.characterList = characterList;
     }

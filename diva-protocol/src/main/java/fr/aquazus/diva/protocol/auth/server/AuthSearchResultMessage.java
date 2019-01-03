@@ -7,15 +7,15 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-public @Data class AccountLoginSearchResultMessage extends ProtocolMessage {
+public @Data class AuthSearchResultMessage extends ProtocolMessage {
 
     private HashMap<Integer, Integer> characterCount;
 
-    public AccountLoginSearchResultMessage() {
+    public AuthSearchResultMessage() {
         this(new HashMap<>());
     }
 
-    public AccountLoginSearchResultMessage(HashMap<Integer, Integer> characterCount) {
+    public AuthSearchResultMessage(HashMap<Integer, Integer> characterCount) {
         this.characterCount = characterCount;
     }
 

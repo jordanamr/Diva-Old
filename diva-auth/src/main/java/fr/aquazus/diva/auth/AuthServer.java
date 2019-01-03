@@ -5,7 +5,7 @@ import fr.aquazus.diva.auth.network.AuthCipher;
 import fr.aquazus.diva.auth.network.AuthClient;
 import fr.aquazus.diva.auth.redis.AuthRedis;
 import fr.aquazus.diva.database.generated.auth.tables.pojos.Servers;
-import fr.aquazus.diva.protocol.auth.server.AccountLoginServersMessage;
+import fr.aquazus.diva.protocol.auth.server.AuthServersMessage;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import simplenet.Server;
@@ -34,9 +34,11 @@ public class AuthServer {
     @Getter
     private AuthDatabase database;
     @Getter
+    private AuthRedis redis;
+    @Getter
     private String[] forbiddenNames;
     @Getter
-    private Map<Integer, AccountLoginServersMessage.Server> serversCache;
+    private Map<Integer, AuthServersMessage.Server> serversCache;
     @Getter
     private Map<Integer, String> serversIpCache;
 
@@ -62,13 +64,13 @@ public class AuthServer {
         database.connect();
         log.info("Initializing GameServers list...");
         for (Servers servers : database.getServersDao().findAll()) {
-            serversCache.put(servers.getId(), new AccountLoginServersMessage.Server(servers.getId(), AccountLoginServersMessage.ServerState.OFFLINE,
-                    AccountLoginServersMessage.ServerPopulation.valueOf(servers.getPopulation().intValue()), servers.getP2p().intValue() == 1));
+            serversCache.put(servers.getId(), new AuthServersMessage.Server(servers.getId(), AuthServersMessage.ServerState.OFFLINE,
+                    AuthServersMessage.ServerPopulation.valueOf(servers.getPopulation().intValue()), servers.getP2p().intValue() == 1));
         }
         log.info(serversCache.size() + " GameServers detected.");
         log.info("Starting Redis communication...");
-        AuthRedis communication = new AuthRedis(this, config.getRedisIp(), config.getRedisPort());
-        new Thread(communication).start();
+        redis = new AuthRedis(this, config.getRedisIp(), config.getRedisPort());
+        new Thread(redis).start();
         listen();
     }
 

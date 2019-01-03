@@ -7,11 +7,11 @@ import java.util.Arrays;
 import java.util.Optional;
 
 public @Data
-class AccountLoginCommunityMessage extends ProtocolMessage {
+class AuthCommunityMessage extends ProtocolMessage {
 
     private Community community;
 
-    public AccountLoginCommunityMessage(Community community) {
+    public AuthCommunityMessage(Community community) {
         this.community = community;
     }
 

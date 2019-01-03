@@ -6,11 +6,11 @@ import lombok.Data;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
-public @Data class AccountLoginQuestionMessage extends ProtocolMessage {
+public @Data class AuthQuestionMessage extends ProtocolMessage {
 
     private String secretQuestion;
 
-    public AccountLoginQuestionMessage(String secretQuestion) {
+    public AuthQuestionMessage(String secretQuestion) {
         this.secretQuestion = secretQuestion;
     }
 

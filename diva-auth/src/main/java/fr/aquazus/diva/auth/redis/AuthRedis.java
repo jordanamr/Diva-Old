@@ -50,6 +50,10 @@ public class AuthRedis implements Runnable {
         }
     }
 
+    public void setTicket(int serverId, String ticket, String ip) {
+        pool.getResource().publish("diva", "AT" + serverId + "|" + ticket + "|" + ip);
+    }
+
     private boolean handleMessage(String message) {
         if (message.length() < 2) return false;
         switch (message.charAt(0)) {

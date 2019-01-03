@@ -3,18 +3,16 @@ package fr.aquazus.diva.protocol.auth.server;
 import fr.aquazus.diva.protocol.ProtocolMessage;
 import lombok.Data;
 
-import java.util.Random;
-
-public @Data class AccountLoginErrorMessage extends ProtocolMessage {
+public @Data class AuthErrorMessage extends ProtocolMessage {
 
     private Type type;
     private String extraData;
 
-    public AccountLoginErrorMessage(Type type) {
+    public AuthErrorMessage(Type type) {
         this(type, "");
     }
 
-    public AccountLoginErrorMessage(Type type, String extraData) {
+    public AuthErrorMessage(Type type, String extraData) {
         this.type = type;
         this.extraData = extraData;
     }
