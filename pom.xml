@@ -26,5 +26,6 @@
         <module>diva-protocol</module>
         <module>diva-database</module>
         <module>diva-auth</module>
+        <module>diva-game</module>
     </modules>
 </project>
