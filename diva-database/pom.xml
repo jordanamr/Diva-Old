@@ -18,6 +18,7 @@
         <db.username>diva</db.username>
         <db.password>test</db.password>
         <db.auth>diva_auth</db.auth>
+        <db.game>diva_game</db.game>
     </properties>
 
     <build>
@@ -57,6 +58,40 @@
                                 </generate>
                                 <target>
                                     <packageName>fr.aquazus.diva.database.generated.auth</packageName>
+                                    <directory>target/generated-sources</directory>
+                                </target>
+                            </generator>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>jooq-codegen-game</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <jdbc>
+                                <driver>${db.driver}</driver>
+                                <url>${db.url}</url>
+                                <user>${db.username}</user>
+                                <password>${db.password}</password>
+                            </jdbc>
+                            <generator>
+                                <database>
+                                    <name>org.jooq.meta.mariadb.MariaDBDatabase</name>
+                                    <includes>.*</includes>
+                                    <excludes></excludes>
+                                    <inputSchema>${db.game}</inputSchema>
+                                </database>
+                                <generate>
+                                    <daos>true</daos>
+                                    <deprecated>false</deprecated>
+                                    <instanceFields>true</instanceFields>
+                                    <pojos>true</pojos>
+                                    <records>false</records>
+                                </generate>
+                                <target>
+                                    <packageName>fr.aquazus.diva.database.generated.game</packageName>
                                     <directory>target/generated-sources</directory>
                                 </target>
                             </generator>
