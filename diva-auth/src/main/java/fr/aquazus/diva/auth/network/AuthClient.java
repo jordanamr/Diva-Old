@@ -19,7 +19,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 import static fr.aquazus.diva.database.generated.auth.Tables.ACCOUNTS;
-import static fr.aquazus.diva.protocol.auth.server.AuthCommunityMessage.Community;
 
 @Slf4j
 public class AuthClient implements ProtocolHandler {
@@ -35,7 +34,7 @@ public class AuthClient implements ProtocolHandler {
     private String accountSecretQuestion;
     private int accountSubscriptionTime;
     private boolean hasRights;
-    private Community community;
+    private AuthCommunityMessage.Community community;
 
     public AuthClient(AuthServer server, Client netClient, String ip) {
         this.server = server;
