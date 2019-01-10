@@ -1,0 +1,43 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>fr.aquazus.diva</groupId>
+        <artifactId>diva</artifactId>
+        <version>0.0.1-dev</version>
+    </parent>
+
+    <artifactId>diva-common</artifactId>
+    <version>0.0.1-dev</version>
+    <packaging>jar</packaging>
+    <name>Diva Common</name>
+
+    <dependencies>
+        <dependency>
+            <groupId>fr.aquazus.diva</groupId>
+            <artifactId>diva-protocol</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>fr.aquazus.diva</groupId>
+            <artifactId>diva-database</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>redis.clients</groupId>
+            <artifactId>jedis</artifactId>
+            <version>${jedis.version}</version>
+        </dependency>
+    </dependencies>
+</project>

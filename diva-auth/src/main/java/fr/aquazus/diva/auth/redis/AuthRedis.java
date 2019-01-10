@@ -1,60 +1,32 @@
 package fr.aquazus.diva.auth.redis;
 
 import fr.aquazus.diva.auth.AuthServer;
+import fr.aquazus.diva.common.redis.DivaRedis;
 import lombok.extern.slf4j.Slf4j;
-import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.JedisPoolConfig;
-import redis.clients.jedis.JedisPubSub;
 
 @Slf4j
-public class AuthRedis implements Runnable {
+public class AuthRedis extends DivaRedis implements Runnable {
 
     private final AuthServer server;
-    private final JedisPoolConfig poolConfig;
-    private final JedisPool pool;
 
     public AuthRedis(AuthServer server, String ip, int port) {
+        super(ip, port);
         this.server = server;
-        this.poolConfig = new JedisPoolConfig();
-        this.pool = new JedisPool(poolConfig, ip, port);
     }
 
     @Override
     public void run() {
-        try {
-            pool.getResource().subscribe(new JedisPubSub() {
-                @Override
-                public void onSubscribe(String channel, int subscribedChannels) {
-                    log.info("Successfully subscribed to Redis!");
-                    log.debug("Sending Auth Hello packet...");
-                    pool.getResource().publish(channel, "AH");
-                }
-
-                @Override
-                public void onMessage(String channel, String message) {
-                    log.debug("[Redis] <-- " + message);
-                    if (!handleMessage(message)) {
-                        log.warn("Invalid exchange packet: " + message);
-                    }
-                }
-
-                @Override
-                public void onUnsubscribe(String channel, int subscribedChannels) {
-                    log.error("The Redis channel got disconnected.");
-                    System.exit(-1);
-                }
-            }, "diva");
-        } catch (Exception ex) {
-            log.error("An error occurred while loading Redis", ex);
-            System.exit(-1);
-        }
+        connect();
     }
 
-    public void setTicket(int serverId, String ticket, String ip) {
-        pool.getResource().publish("diva", "AT" + serverId + "|" + ticket + "|" + ip);
+    @Override
+    protected void onReady() {
+        log.debug("Sending Auth Hello packet...");
+        publish("AH");
     }
 
-    private boolean handleMessage(String message) {
+    @Override
+    protected boolean onMessageReceived(String message) {
         if (message.length() < 2) return false;
         switch (message.charAt(0)) {
             case 'A':
@@ -76,5 +48,9 @@ public class AuthRedis implements Runnable {
             default:
                 return false;
         }
+    }
+
+    public void setTicket(int serverId, String ticket, String ip) {
+        publish("AT" + serverId + "|" + ticket + "|" + ip);
     }
 }
