@@ -11,7 +11,7 @@
  Target Server Version : 100135
  File Encoding         : 65001
 
- Date: 21/12/2018 13:17:35
+ Date: 20/01/2019 05:28:39
 */
 
 SET NAMES utf8mb4;
@@ -30,10 +30,17 @@ CREATE TABLE `accounts`  (
   `secret_answer` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'oui',
   `remaining_subscription` int(11) NOT NULL DEFAULT -1,
   `rank` int(11) NOT NULL DEFAULT 1,
+  `community` tinyint(2) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `username`(`username`) USING BTREE,
   UNIQUE INDEX `nickname`(`nickname`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Compact;
+) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Compact;
+
+-- ----------------------------
+-- Records of accounts
+-- ----------------------------
+INSERT INTO `accounts` VALUES (1, 'test', 'test', 'test', 'Supprimer ?', 'oui', -1, 3, 0);
+INSERT INTO `accounts` VALUES (2, 'test2', 'test2', 'test2', 'Supprimer ?', 'oui', -1, 1, 0);
 
 -- ----------------------------
 -- Table structure for characters
@@ -61,16 +68,27 @@ CREATE TABLE `ranks`  (
 ) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Compact;
 
 -- ----------------------------
+-- Records of ranks
+-- ----------------------------
+INSERT INTO `ranks` VALUES (1, 'Joueur', 0);
+INSERT INTO `ranks` VALUES (2, 'Modérateur', 1);
+INSERT INTO `ranks` VALUES (3, 'Administrateur', 1);
+
+-- ----------------------------
 -- Table structure for servers
 -- ----------------------------
 DROP TABLE IF EXISTS `servers`;
 CREATE TABLE `servers`  (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `status` tinyint(4) NOT NULL,
   `population` tinyint(1) NOT NULL DEFAULT 1,
-  `p2p` tinyint(1) NULL DEFAULT 0,
+  `p2p` tinyint(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 39 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Compact;
+) ENGINE = InnoDB AUTO_INCREMENT = 901 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Compact;
+
+-- ----------------------------
+-- Records of servers
+-- ----------------------------
+INSERT INTO `servers` VALUES (900, 'Test', 1, 0);
 
 SET FOREIGN_KEY_CHECKS = 1;
