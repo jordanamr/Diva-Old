@@ -131,7 +131,7 @@ public class AuthClient implements ProtocolHandler {
                 if (packet.equals("Af")) break;
                 if (packet.length() < 3 || packet.length() > 20 ||
                         packet.equalsIgnoreCase(this.accountUsername) ||
-                        packet.matches("^.*[^a-zA-Z0-9-].*$") ||
+                        packet.matches("^.*[^a-zA-Z-].*$") ||
                         packet.matches(".*--.*") ||
                         packet.startsWith("-") || packet.endsWith("-") ||
                         packet.chars().filter(ch -> ch == '-').count() > 2 ||
