@@ -1,0 +1,42 @@
+<configuration>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <filter class="fr.aquazus.diva.game.logging.DebugFilter" />
+        <encoder>
+            <pattern>%d{HH:mm:ss} %level %logger{24} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="FILE-GAME" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <filter class="fr.aquazus.diva.game.logging.DebugFilter" />
+        <file>logs/game.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>logs/game.%d{dd-MM-yyyy}.log</fileNamePattern>
+            <maxHistory>7</maxHistory>
+            <totalSizeCap>256MB</totalSizeCap>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{d/M/Y HH:mm:ss.SSS} [%thread] %level %logger{35} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="FILE-GAME-ERROR" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>ERROR</level>
+        </filter>
+        <file>logs/error/game-error.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>logs/error/game-error.%d{dd-MM-yyyy}.log</fileNamePattern>
+            <maxHistory>7</maxHistory>
+            <totalSizeCap>256MB</totalSizeCap>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{d/M/Y HH:mm:ss.SSS} [%thread] %level %logger{35} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <root level="DEBUG">
+        <appender-ref ref="STDOUT" />
+        <appender-ref ref="FILE-GAME" />
+        <appender-ref ref="FILE-GAME-ERROR" />
+    </root>
+</configuration>
