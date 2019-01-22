@@ -52,6 +52,7 @@ public class AuthClient implements ProtocolHandler {
         netClient.readByteAlways(data -> {
             if (data == (byte) 0) {
                 String packet = new String(stream.toByteArray(), StandardCharsets.UTF_8);
+                if (packet.length() <= 1) return;
                 packet = packet.substring(0, packet.length() - 1);
                 stream.reset();
                 this.log("<-- " + packet);
