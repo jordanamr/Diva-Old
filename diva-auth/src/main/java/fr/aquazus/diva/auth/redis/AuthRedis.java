@@ -2,6 +2,7 @@ package fr.aquazus.diva.auth.redis;
 
 import fr.aquazus.diva.auth.AuthServer;
 import fr.aquazus.diva.common.redis.DivaRedis;
+import fr.aquazus.diva.protocol.auth.server.AuthServersMessage;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -34,8 +35,19 @@ public class AuthRedis extends DivaRedis implements Runnable {
             case 'G':
                 switch (message.charAt(1)) {
                     case 'H':
-                        /* TODO Game Hello, sends IP & Status
-                            Format: GHid|ip|status */
+                        try {
+                            String[] helloData = message.substring(2).split("\\|");
+                            int helloId = Integer.parseInt(helloData[0]);
+                            String helloIp = helloData[1];
+                            int helloStatus = Integer.parseInt(helloData[2]);
+                            server.getServersCache().get(helloId).setState(AuthServersMessage.ServerState.valueOf(helloStatus));
+                            server.getServersIpCache().put(helloId, helloIp);
+                            log.debug("Status set for server id " + helloId);
+                            server.resendServersData();
+                            return true;
+                        } catch (Exception ex) {
+                            return false;
+                        }
                     case 'S':
                         /* TODO Game Status, update server status
                             Format: GSid|status */
@@ -50,7 +62,7 @@ public class AuthRedis extends DivaRedis implements Runnable {
         }
     }
 
-    public void setTicket(int serverId, String ticket, String ip) {
-        publish("AT" + serverId + "|" + ticket + "|" + ip);
+    public void setTicket(int serverId, int accountId, String ip, String ticket) {
+        publish("AT" + serverId + "|" + accountId + "|" + ip + "|" + ticket);
     }
 }
