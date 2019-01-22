@@ -22,7 +22,7 @@ public class AuthRedis extends DivaRedis implements Runnable {
 
     @Override
     protected void onReady() {
-        log.debug("Sending Auth Hello packet...");
+        log.info("Requesting GameServers availability...");
         publish("AH");
     }
 
