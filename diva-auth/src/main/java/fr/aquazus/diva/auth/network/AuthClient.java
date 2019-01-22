@@ -1,19 +1,17 @@
 package fr.aquazus.diva.auth.network;
 
 import fr.aquazus.diva.auth.AuthServer;
+import fr.aquazus.diva.common.network.DivaClient;
 import fr.aquazus.diva.database.generated.auth.tables.pojos.Accounts;
 import fr.aquazus.diva.database.generated.auth.tables.pojos.Characters;
-import fr.aquazus.diva.protocol.ProtocolHandler;
-import fr.aquazus.diva.protocol.ProtocolMessage;
+import fr.aquazus.diva.protocol.DivaProtocol;
 import fr.aquazus.diva.protocol.auth.client.AuthConnectMessage;
 import fr.aquazus.diva.protocol.auth.client.AuthSearchMessage;
 import fr.aquazus.diva.protocol.auth.server.*;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import simplenet.Client;
-import simplenet.packet.Packet;
 
-import java.io.ByteArrayOutputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -21,12 +19,11 @@ import java.util.HashMap;
 import static fr.aquazus.diva.database.generated.auth.Tables.ACCOUNTS;
 
 @Slf4j
-public class AuthClient implements ProtocolHandler {
+public class AuthClient extends DivaClient implements DivaProtocol {
 
     private final AuthServer server;
-    private final Client netClient;
-    private final String ip;
     private String authKey;
+    @Getter
     private State state;
     private int accountId;
     private String accountUsername;
@@ -37,57 +34,34 @@ public class AuthClient implements ProtocolHandler {
     private AuthCommunityMessage.Community community;
 
     public AuthClient(AuthServer server, Client netClient, String ip) {
+        super(netClient, ip);
         this.server = server;
-        this.netClient = netClient;
-        this.ip = ip;
         this.state = State.INITIALIZING;
         startCommunication();
     }
 
-    private void startCommunication() {
+    @Override
+    protected void onReady() {
         HelloConnectMessage hc = new HelloConnectMessage();
         authKey = hc.getKey();
-
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        netClient.readByteAlways(data -> {
-            if (data == (byte) 0) {
-                String packet = new String(stream.toByteArray(), StandardCharsets.UTF_8);
-                if (packet.length() <= 1) return;
-                packet = packet.substring(0, packet.length() - 1);
-                stream.reset();
-                this.log("<-- " + packet);
-                if (state != State.DISCONNECTED && netClient.getChannel().isOpen() && !handlePacket(packet)) {
-                    disconnect("Malformed or unimplemented packet", packet);
-                }
-                return;
-            }
-            stream.write(data);
-        });
-
-        netClient.preDisconnect(this::disconnect);
-
         state = State.WAIT_VERSION;
         sendProtocolMessage(hc);
     }
 
-    private void disconnect(String... reason) {
-        if (state == State.DISCONNECTED) {
-            return;
-        }
-        this.log("disconnected!" + (reason.length != 0 ? " " + Arrays.toString(reason) : ""));
+    @Override
+    protected void onDisconnect() {
         state = State.DISCONNECTED;
-        if (netClient.getChannel().isOpen()) netClient.close();
         server.getClients().remove(this);
     }
 
     @Override
     public boolean handlePacket(String packet) {
-        if (packet.length() < 2) return false;
+        if (packet.length() <= 1) return false;
 
         switch (state) {
             case WAIT_VERSION:
-                if (!packet.equals(ProtocolHandler.version)) {
-                    sendProtocolMessage(new AuthErrorMessage(AuthErrorMessage.Type.BAD_VERSION, ProtocolHandler.version));
+                if (!packet.equals(DivaProtocol.version)) {
+                    sendProtocolMessage(new AuthErrorMessage(AuthErrorMessage.Type.BAD_VERSION, DivaProtocol.version));
                     disconnect("Wrong client version", packet);
                     return true;
                 }
@@ -196,9 +170,10 @@ public class AuthClient implements ProtocolHandler {
                     sendProtocolMessage(new AuthConnectErrorMessage(AuthConnectErrorMessage.Type.NOT_AVAILABLE));
                 }
                 String ticket = server.getCipher().generateTicket();
-                server.getRedis().setTicket(serverId, ticket, ip);
+                server.getRedis().setTicket(serverId, accountId, ip, ticket);
                 String encryptedAddress = server.getCipher().encodeAXK(server.getServersIpCache().get(serverId));
                 sendProtocolMessage(new AuthAddressMessage(encryptedAddress, ticket));
+                return true;
         }
         return false;
     }
@@ -211,31 +186,8 @@ public class AuthClient implements ProtocolHandler {
         sendProtocolMessage(new AuthQuestionMessage(this.accountSecretQuestion));
     }
 
-    private void log(String message) {
-        String format = "[" + ip + (accountUsername == null ? "" : " - " + accountUsername) + "] " + message;
-        if (message.startsWith("-->") || message.startsWith("<--")) {
-            log.debug(format);
-        } else {
-            log.info(format);
-        }
-    }
-
-    private void sendProtocolMessage(ProtocolMessage message) {
-        sendPacket(message.serialize());
-    }
-
-    private void sendPacket(String packet) {
-        try {
-            byte[] data = (packet + "\0").getBytes(StandardCharsets.UTF_8);
-            this.log("--> " + packet);
-            for (int bound = 0; bound < data.length; bound += 1024) {
-                int end = Math.min(data.length, bound + 1024);
-                Packet.builder().putBytes(Arrays.copyOfRange(data, bound, end)).writeAndFlush(netClient);
-            }
-        } catch (Exception ex) {
-            log.error("An error occurred while splitting a packet", ex);
-            disconnect("Packet splitting exception");
-        }
+    public void updateServersData() {
+        sendProtocolMessage(new AuthServersMessage(new ArrayList<>(server.getServersCache().values())));
     }
 
     public enum State {
