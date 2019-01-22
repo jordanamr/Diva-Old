@@ -42,7 +42,7 @@ public class AuthRedis extends DivaRedis implements Runnable {
                             int helloStatus = Integer.parseInt(helloData[2]);
                             server.getServersCache().get(helloId).setState(AuthServersMessage.ServerState.valueOf(helloStatus));
                             server.getServersIpCache().put(helloId, helloIp);
-                            log.debug("Status set for server id " + helloId);
+                            log.info("GameServer " + helloId + " said hello with status " + helloStatus);
                             server.resendServersData();
                             return true;
                         } catch (Exception ex) {
