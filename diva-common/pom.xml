@@ -24,6 +24,11 @@
             <version>${project.parent.version}</version>
         </dependency>
         <dependency>
+            <groupId>com.github.jhg023</groupId>
+            <artifactId>SimpleNet</artifactId>
+            <version>${simplenet.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>${lombok.version}</version>

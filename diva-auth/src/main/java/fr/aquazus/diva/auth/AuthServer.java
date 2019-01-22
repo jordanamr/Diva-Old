@@ -4,16 +4,18 @@ import fr.aquazus.diva.auth.database.AuthDatabase;
 import fr.aquazus.diva.auth.network.AuthCipher;
 import fr.aquazus.diva.auth.network.AuthClient;
 import fr.aquazus.diva.auth.redis.AuthRedis;
+import fr.aquazus.diva.common.DivaServer;
 import fr.aquazus.diva.database.generated.auth.tables.pojos.Servers;
 import fr.aquazus.diva.protocol.auth.server.AuthServersMessage;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import simplenet.Client;
 import simplenet.Server;
 
 import java.util.*;
 
 @Slf4j
-public class AuthServer {
+public class AuthServer extends DivaServer {
 
     private static AuthServer instance = null;
 
@@ -71,25 +73,18 @@ public class AuthServer {
         log.info("Starting Redis communication...");
         redis = new AuthRedis(this, config.getRedisIp(), config.getRedisPort());
         new Thread(redis).start();
-        listen();
+        super.listen(config.getBindIp(), config.getBindPort());
     }
 
-    private void listen() {
-        log.info("Starting net server...");
-        Server netServer = new Server(1024);
-        netServer.onConnect(netClient -> {
-            String clientIp;
-            try {
-                clientIp = netClient.getChannel().getRemoteAddress().toString().substring(1).split(":")[0];
-            } catch (Exception ex) {
-                log.error("An error occurred while parsing an user IP", ex);
-                if (netClient.getChannel().isOpen()) netClient.close();
-                return;
-            }
-            log.info("[" + clientIp + "] connected!");
-            this.clients.add(new AuthClient(this, netClient, clientIp));
-        });
-        netServer.bind(config.getBindIp(), config.getBindPort());
+    @Override
+    protected void onClientConnect(Client netClient, String clientIp) {
+        this.clients.add(new AuthClient(this, netClient, clientIp));
     }
 
+    public void resendServersData() {
+        log.debug("Resending servers data...");
+        for (AuthClient client : clients) {
+            if (client.getState() == AuthClient.State.SELECT_SERVER) client.updateServersData();
+        }
+    }
 }
