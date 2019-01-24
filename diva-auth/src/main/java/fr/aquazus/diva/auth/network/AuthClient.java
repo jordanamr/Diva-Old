@@ -9,6 +9,7 @@ import fr.aquazus.diva.protocol.DivaProtocol;
 import fr.aquazus.diva.protocol.auth.client.AuthConnectMessage;
 import fr.aquazus.diva.protocol.auth.client.AuthSearchMessage;
 import fr.aquazus.diva.protocol.auth.server.*;
+import fr.aquazus.diva.protocol.game.server.CharacterCreationErrorMessage;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import simplenet.Client;
@@ -17,6 +18,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import static fr.aquazus.diva.database.generated.auth.Tables.ACCOUNTS;
+import static fr.aquazus.diva.database.generated.auth.Tables.CHARACTERS;
 
 @Slf4j
 public class AuthClient extends DivaClient implements DivaProtocol {
@@ -103,6 +105,10 @@ public class AuthClient extends DivaClient implements DivaProtocol {
             case WAIT_NICKNAME:
                 if (packet.equals("Af")) break;
                 if (!StringUtils.isValidName(packet)) {
+                    sendProtocolMessage(new AuthErrorMessage(AuthErrorMessage.Type.NICKNAME_TAKEN));
+                    return true;
+                }
+                if (server.getDatabase().getDsl().selectFrom(ACCOUNTS).where(ACCOUNTS.NICKNAME.eq(packet)).fetchOne() != null) {
                     sendProtocolMessage(new AuthErrorMessage(AuthErrorMessage.Type.NICKNAME_TAKEN));
                     return true;
                 }

@@ -9,8 +9,6 @@ import fr.aquazus.diva.protocol.game.server.RandomNameMessage;
 import lombok.extern.slf4j.Slf4j;
 import simplenet.Client;
 
-import java.util.Arrays;
-
 import static fr.aquazus.diva.database.generated.auth.Tables.CHARACTERS;
 
 @Slf4j
@@ -105,12 +103,6 @@ public class GameClient extends DivaClient {
                         }
                         return true;
                 }
-        }
-
-
-        switch (packet.charAt(0)) {
-            case 'A':
-                if (packet.length() <= 2) return false;
         }
         return true;
     }
