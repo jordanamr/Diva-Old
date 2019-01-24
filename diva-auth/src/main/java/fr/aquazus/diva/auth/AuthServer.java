@@ -38,8 +38,6 @@ public class AuthServer extends DivaServer {
     @Getter
     private AuthRedis redis;
     @Getter
-    private String[] forbiddenNames;
-    @Getter
     private Map<Integer, AuthServersMessage.Server> serversCache;
     @Getter
     private Map<Integer, String> serversIpCache;
@@ -48,7 +46,6 @@ public class AuthServer extends DivaServer {
         config = new AuthConfiguration();
         clients = Collections.synchronizedList(new ArrayList<>());
         cipher = new AuthCipher();
-        forbiddenNames = new String[] {"xelor", "iop", "feca", "eniripsa", "sadida", "ecaflip", "enutrof", "pandawa", "sram", "cra", "osamodas", "sacrieur", "drop", "mule", "admin", "ankama", "dofus", "staff", "moderateur"};
         serversCache = Collections.synchronizedMap(new HashMap<>());
         serversIpCache = Collections.synchronizedMap(new HashMap<>());
     }

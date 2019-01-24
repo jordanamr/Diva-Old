@@ -2,6 +2,7 @@ package fr.aquazus.diva.auth.network;
 
 import fr.aquazus.diva.auth.AuthServer;
 import fr.aquazus.diva.common.network.DivaClient;
+import fr.aquazus.diva.common.utils.StringUtils;
 import fr.aquazus.diva.database.generated.auth.tables.pojos.Accounts;
 import fr.aquazus.diva.database.generated.auth.tables.pojos.Characters;
 import fr.aquazus.diva.protocol.DivaProtocol;
@@ -13,7 +14,6 @@ import lombok.extern.slf4j.Slf4j;
 import simplenet.Client;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 
 import static fr.aquazus.diva.database.generated.auth.Tables.ACCOUNTS;
@@ -26,7 +26,6 @@ public class AuthClient extends DivaClient implements DivaProtocol {
     @Getter
     private State state;
     private int accountId;
-    private String accountUsername;
     private String accountNickname;
     private String accountSecretQuestion;
     private int accountSubscriptionTime;
@@ -89,7 +88,6 @@ public class AuthClient extends DivaClient implements DivaProtocol {
                     return true;
                 }
                 this.accountId = accountPojo.getId();
-                this.accountUsername = accountPojo.getUsername();
                 this.accountSecretQuestion = accountPojo.getSecretQuestion();
                 this.accountSubscriptionTime = accountPojo.getRemainingSubscription();
                 this.hasRights = server.getDatabase().getRanksDao().fetchOneById(accountPojo.getRank()).getConsoleAccess().intValue() == 1;
@@ -104,14 +102,7 @@ public class AuthClient extends DivaClient implements DivaProtocol {
                 return true;
             case WAIT_NICKNAME:
                 if (packet.equals("Af")) break;
-                if (packet.length() < 3 || packet.length() > 20 ||
-                        packet.equalsIgnoreCase(this.accountUsername) ||
-                        packet.matches("^.*[^a-zA-Z-].*$") ||
-                        packet.matches(".*--.*") ||
-                        packet.startsWith("-") || packet.endsWith("-") ||
-                        packet.chars().filter(ch -> ch == '-').count() > 2 ||
-                        Arrays.stream(server.getForbiddenNames()).anyMatch(packet.toLowerCase()::contains) ||
-                        server.getDatabase().getAccountsDao().fetchOneByNickname(packet) != null) {
+                if (!StringUtils.isValidName(packet)) {
                     sendProtocolMessage(new AuthErrorMessage(AuthErrorMessage.Type.NICKNAME_TAKEN));
                     return true;
                 }
