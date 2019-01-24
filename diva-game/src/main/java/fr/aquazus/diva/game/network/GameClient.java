@@ -97,10 +97,31 @@ public class GameClient extends DivaClient {
                             sendProtocolMessage(new CharacterCreationErrorMessage(CharacterCreationErrorMessage.Type.NAME_INVALID));
                             return true;
                         }
-                        if (server.getAuthDatabase().getDsl().selectFrom(CHARACTERS).where(CHARACTERS.SERVER.eq(server.getId())).and(CHARACTERS.NAME.eq(characterName)).fetchOne() != null) {
+                        if (server.getAuthDatabase().getDsl().selectFrom(CHARACTERS).where(CHARACTERS.SERVER_ID.eq(server.getId())).and(CHARACTERS.NAME.eq(characterName)).fetchOne() != null) {
                             sendProtocolMessage(new CharacterCreationErrorMessage(CharacterCreationErrorMessage.Type.NAME_TAKEN));
                             return true;
                         }
+                        byte characterClass, characterGender;
+                        int characterColor1, characterColor2, characterColor3;
+                        try {
+                            characterClass = Byte.parseByte(characterData[1]);
+                            characterGender = Byte.parseByte(characterData[2]);
+                            characterColor1 = Integer.parseInt(characterData[3]);
+                            characterColor2 = Integer.parseInt(characterData[4]);
+                            characterColor3 = Integer.parseInt(characterData[5]);
+                        } catch (NumberFormatException ex) {
+                            return false;
+                        }
+                        if (characterClass < 1 || characterClass > 12) return false;
+                        if (characterGender != 0 && characterGender != 1) return false;
+                        if (characterColor1 < -1 || characterColor1 > 16777215) return false;
+                        if (characterColor2 < -1 || characterColor2 > 16777215) return false;
+                        if (characterColor3 < -1 || characterColor3 > 16777215) return false;
+                        server.getAuthDatabase().getDsl().insertInto(CHARACTERS).set(CHARACTERS.ACCOUNT_ID, accountId)
+                                .set(CHARACTERS.SERVER_ID, server.getId()).set(CHARACTERS.NAME, characterName)
+                                .set(CHARACTERS.CLASS, characterClass).set(CHARACTERS.GENDER, characterGender)
+                                .set(CHARACTERS.COLOR1, characterColor1).set(CHARACTERS.COLOR2, characterColor2)
+                                .set(CHARACTERS.COLOR3, characterColor3).execute();
                         return true;
                 }
         }

@@ -127,10 +127,10 @@ public class AuthClient extends DivaClient implements DivaProtocol {
             case 'x':
                 HashMap<Integer, Integer> characterList = new HashMap<>();
                 for (Characters characters : server.getDatabase().getCharactersDao().fetchByAccountId(accountId)) {
-                    if (characterList.containsKey(characters.getServer())) {
-                        characterList.put(characters.getServer(), characterList.get(characters.getServer()) + 1);
+                    if (characterList.containsKey(characters.getServerId())) {
+                        characterList.put(characters.getServerId(), characterList.get(characters.getServerId()) + 1);
                     } else {
-                        characterList.put(characters.getServer(), 1);
+                        characterList.put(characters.getServerId(), 1);
                     }
                 }
                 sendProtocolMessage(new AuthDataMessage(accountSubscriptionTime, characterList));
@@ -148,10 +148,10 @@ public class AuthClient extends DivaClient implements DivaProtocol {
                 }
                 HashMap<Integer, Integer> characterCount = new HashMap<>();
                 for (Characters characters : server.getDatabase().getCharactersDao().fetchByAccountId(friendPojo.getId())) {
-                    if (characterCount.containsKey(characters.getServer())) {
-                        characterCount.put(characters.getServer(), characterCount.get(characters.getServer()) + 1);
+                    if (characterCount.containsKey(characters.getServerId())) {
+                        characterCount.put(characters.getServerId(), characterCount.get(characters.getServerId()) + 1);
                     } else {
-                        characterCount.put(characters.getServer(), 1);
+                        characterCount.put(characters.getServerId(), 1);
                     }
                 }
                 result.setCharacterCount(characterCount);
