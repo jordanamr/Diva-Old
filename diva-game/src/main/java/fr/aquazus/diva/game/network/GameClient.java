@@ -93,7 +93,7 @@ public class GameClient extends DivaClient {
                         String[] characterData = packet.substring(2).split("\\|");
                         if (characterData.length != 6) return false;
                         String characterName = characterData[0];
-                        if (!StringUtils.isValidName(characterName)) {
+                        if (!StringUtils.isValidCharacterName(characterName)) {
                             sendProtocolMessage(new CharacterCreationErrorMessage(CharacterCreationErrorMessage.Type.NAME_INVALID));
                             return true;
                         }

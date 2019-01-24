@@ -104,7 +104,7 @@ public class AuthClient extends DivaClient implements DivaProtocol {
                 return true;
             case WAIT_NICKNAME:
                 if (packet.equals("Af")) break;
-                if (!StringUtils.isValidName(packet)) {
+                if (!StringUtils.isValidNickname(packet)) {
                     sendProtocolMessage(new AuthErrorMessage(AuthErrorMessage.Type.NICKNAME_TAKEN));
                     return true;
                 }
