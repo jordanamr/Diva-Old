@@ -9,7 +9,6 @@ import fr.aquazus.diva.protocol.DivaProtocol;
 import fr.aquazus.diva.protocol.auth.client.AuthConnectMessage;
 import fr.aquazus.diva.protocol.auth.client.AuthSearchMessage;
 import fr.aquazus.diva.protocol.auth.server.*;
-import fr.aquazus.diva.protocol.game.server.CharacterCreationErrorMessage;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import simplenet.Client;
@@ -18,7 +17,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import static fr.aquazus.diva.database.generated.auth.Tables.ACCOUNTS;
-import static fr.aquazus.diva.database.generated.auth.Tables.CHARACTERS;
 
 @Slf4j
 public class AuthClient extends DivaClient implements DivaProtocol {
@@ -178,13 +176,13 @@ public class AuthClient extends DivaClient implements DivaProtocol {
     private void sendAccountData() {
         sendProtocolMessage(new AuthNicknameMessage(this.accountNickname));
         sendProtocolMessage(new AuthCommunityMessage(this.community));
-        sendProtocolMessage(new AuthServersMessage(new ArrayList<>(server.getServersCache().values())));
+        sendProtocolMessage(new AuthServersMessage(new ArrayList<>(server.getServersCache().values()), (accountSubscriptionTime == -1 || accountSubscriptionTime > 0)));
         sendProtocolMessage(new AuthRightsMessage(this.hasRights));
         sendProtocolMessage(new AuthQuestionMessage(this.accountSecretQuestion));
     }
 
     public void updateServersData() {
-        sendProtocolMessage(new AuthServersMessage(new ArrayList<>(server.getServersCache().values())));
+        sendProtocolMessage(new AuthServersMessage(new ArrayList<>(server.getServersCache().values()), (accountSubscriptionTime == -1 || accountSubscriptionTime > 0)));
     }
 
     public enum State {

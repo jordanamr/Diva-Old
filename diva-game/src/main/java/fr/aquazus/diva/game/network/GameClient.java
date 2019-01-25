@@ -2,10 +2,15 @@ package fr.aquazus.diva.game.network;
 
 import fr.aquazus.diva.common.network.DivaClient;
 import fr.aquazus.diva.common.utils.StringUtils;
+import fr.aquazus.diva.database.generated.auth.tables.pojos.Accounts;
+import fr.aquazus.diva.database.generated.auth.tables.pojos.Characters;
 import fr.aquazus.diva.game.GameServer;
 import fr.aquazus.diva.protocol.common.server.ServerMessage;
+import fr.aquazus.diva.protocol.game.client.CharacterDeletionMessage;
 import fr.aquazus.diva.protocol.game.server.CharacterCreationErrorMessage;
+import fr.aquazus.diva.protocol.game.server.CharacterListMessage;
 import fr.aquazus.diva.protocol.game.server.RandomNameMessage;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import simplenet.Client;
 
@@ -14,9 +19,13 @@ import static fr.aquazus.diva.database.generated.auth.Tables.CHARACTERS;
 @Slf4j
 public class GameClient extends DivaClient {
 
+    @Getter
     private final GameServer server;
     private State state;
     private int accountId;
+    private int remainingSubscription;
+    private int characterCount;
+    private String secretAnswer;
 
     public GameClient(GameServer server, Client netClient, String ip) {
         super(netClient, ip);
@@ -56,6 +65,12 @@ public class GameClient extends DivaClient {
                 }
                 this.accountId = server.getTicketsCache().get(ticketData);
                 server.getTicketsCache().remove(ticketData);
+
+                Accounts accountPojo = server.getAuthDatabase().getAccountsDao().fetchOneById(accountId);
+                this.remainingSubscription = accountPojo.getRemainingSubscription();
+                this.secretAnswer = accountPojo.getSecretAnswer();
+                this.characterCount = server.getAuthDatabase().getDsl().selectFrom(CHARACTERS).where(CHARACTERS.ACCOUNT_ID.eq(accountId)).execute();
+
                 log("Login successful");
                 state = State.CHARACTER_SELECT;
                 sendPacket("ATK0"); //TODO: Implement ATK in protocol module, ATK + base16 (Nbr>0) + HashKey
@@ -77,11 +92,9 @@ public class GameClient extends DivaClient {
                         return true;
                     case 'L':
                         //TODO Character list
-                        sendPacket("ALK");
+                        sendProtocolMessage(new CharacterListMessage(remainingSubscription, characterCount, server.getAuthDatabase().getCharactersDao().fetchByAccountId(accountId)));
                         return true;
                     case 'f':
-                        sendPacket("BN");
-                        sendPacket("BN");
                         sendPacket("BN");
                         //TODO File d'attente
                         return true;
@@ -120,8 +133,33 @@ public class GameClient extends DivaClient {
                         server.getAuthDatabase().getDsl().insertInto(CHARACTERS).set(CHARACTERS.ACCOUNT_ID, accountId)
                                 .set(CHARACTERS.SERVER_ID, server.getId()).set(CHARACTERS.NAME, characterName)
                                 .set(CHARACTERS.CLASS, characterClass).set(CHARACTERS.GENDER, characterGender)
+                                .set(CHARACTERS.GFX_ID, Integer.parseInt(characterClass + "" + characterGender))
                                 .set(CHARACTERS.COLOR1, characterColor1).set(CHARACTERS.COLOR2, characterColor2)
                                 .set(CHARACTERS.COLOR3, characterColor3).execute();
+                        characterCount++;
+                        sendPacket("BN");
+                        sendPacket("AAK");
+                        sendProtocolMessage(new CharacterListMessage(remainingSubscription, characterCount, server.getAuthDatabase().getCharactersDao().fetchByAccountId(accountId)));
+                        return true;
+                    case 'D':
+                        CharacterDeletionMessage deletionMessage = new CharacterDeletionMessage().deserialize(packet);
+                        Characters characterToDelete = server.getAuthDatabase().getCharactersDao().fetchOneById(deletionMessage.getCharacterId());
+                        if (characterToDelete == null) {
+                            disconnect("Trying to delete an unknown character", "" + deletionMessage.getCharacterId());
+                            return true;
+                        }
+                        if (characterToDelete.getAccountId() != accountId) {
+                            disconnect("Trying to delete someone else's character", "" + deletionMessage.getCharacterId());
+                            return true;
+                        }
+                        if (characterToDelete.getLevel() >= 20 && !deletionMessage.getSecretAnswer().equalsIgnoreCase(secretAnswer)) {
+                            sendPacket("ADE");
+                            return true;
+                        }
+                        server.getAuthDatabase().getCharactersDao().delete(characterToDelete);
+                        characterCount--;
+                        sendPacket("BN");
+                        sendProtocolMessage(new CharacterListMessage(remainingSubscription, characterCount, server.getAuthDatabase().getCharactersDao().fetchByAccountId(accountId)));
                         return true;
                 }
         }

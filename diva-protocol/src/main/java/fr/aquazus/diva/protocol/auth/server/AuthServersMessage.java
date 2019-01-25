@@ -11,9 +11,11 @@ import java.util.Optional;
 public @Data class AuthServersMessage extends ProtocolMessage {
 
     private List<Server> serverList;
+    private boolean p2p;
 
-    public AuthServersMessage(List<Server> serverList) {
+    public AuthServersMessage(List<Server> serverList, boolean p2p) {
         this.serverList = serverList;
+        this.p2p = p2p;
     }
 
     @Override
@@ -24,8 +26,8 @@ public @Data class AuthServersMessage extends ProtocolMessage {
             Server server = iterator.next();
             builder.append(server.getId()).append(";");
             builder.append(server.getState().getValue()).append(";");
-            builder.append(server.getPopulation().getValue()).append(";");
-            builder.append(server.isP2p() ? "1" : "0");
+            builder.append(server.getCompletion()).append(";");
+            builder.append(server.isP2p() && !p2p ? "0" : "1");
             if (iterator.hasNext()) {
                 builder.append("|");
             }
@@ -36,13 +38,13 @@ public @Data class AuthServersMessage extends ProtocolMessage {
     public static @Data class Server {
         private int id;
         private ServerState state;
-        private ServerPopulation population;
+        private int completion;
         private boolean p2p;
 
-        public Server(int id, ServerState state, ServerPopulation population, boolean p2p) {
+        public Server(int id, ServerState state, int completion, boolean p2p) {
             this.id = id;
             this.state = state;
-            this.population = population;
+            this.completion = completion;
             this.p2p = p2p;
         }
     }
@@ -65,31 +67,6 @@ public @Data class AuthServersMessage extends ProtocolMessage {
         public static ServerState valueOf(int value) {
             Optional<ServerState> key = Arrays.stream(values())
                     .filter(state -> state.value == value)
-                    .findFirst();
-            return key.orElse(null);
-        }
-    }
-
-    public enum ServerPopulation {
-        RECOMMENDED(1),
-        MEDIUM(2),
-        HIGH(3),
-        FULL(4),
-        COMING_SOON(99);
-
-        private final int value;
-
-        ServerPopulation(int value) {
-            this.value = value;
-        }
-
-        public int getValue() {
-            return value;
-        }
-
-        public static ServerPopulation valueOf(int value) {
-            Optional<ServerPopulation> key = Arrays.stream(values())
-                    .filter(population -> population.value == value)
                     .findFirst();
             return key.orElse(null);
         }

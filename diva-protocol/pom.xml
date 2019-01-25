@@ -12,11 +12,12 @@
     <packaging>jar</packaging>
     <name>Diva Protocol</name>
 
-    <properties>
-
-    </properties>
-
     <dependencies>
+        <dependency>
+            <groupId>fr.aquazus.diva</groupId>
+            <artifactId>diva-database</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>

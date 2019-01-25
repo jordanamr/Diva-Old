@@ -64,7 +64,7 @@ public class AuthServer extends DivaServer {
         log.info("Initializing GameServers list...");
         for (Servers servers : database.getServersDao().findAll()) {
             serversCache.put(servers.getId(), new AuthServersMessage.Server(servers.getId(), AuthServersMessage.ServerState.OFFLINE,
-                    AuthServersMessage.ServerPopulation.valueOf(servers.getPopulation().intValue()), servers.getP2p().intValue() == 1));
+                    servers.getCompletion(), servers.getP2p().intValue() == 1));
         }
         log.info(serversCache.size() + " GameServers detected.");
         log.info("Starting Redis communication...");
