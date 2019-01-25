@@ -36,10 +36,10 @@ public @Data class CharacterListMessage extends ProtocolMessage {
             builder.append(Integer.toHexString(characterPojo.getColor1())).append(";");
             builder.append(Integer.toHexString(characterPojo.getColor2())).append(";");
             builder.append(Integer.toHexString(characterPojo.getColor3())).append(";");
-            builder.append(",,,,;");
+            builder.append(",,,,;"); //TODO cac , coiffe , cape , fami , bouclier
             builder.append(characterPojo.getIsMerchant()).append(";");
             builder.append(characterPojo.getServerId()).append(";");
-            builder.append(";;"); //isDead;deathCount;lvlMax
+            builder.append(";;"); //TODO isDead ; deathCount ; lvlMax
             if (iterator.hasNext()) {
                 builder.append("|");
             }
