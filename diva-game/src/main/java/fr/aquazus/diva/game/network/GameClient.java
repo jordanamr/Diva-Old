@@ -123,13 +123,23 @@ public class GameClient extends DivaClient {
                             characterColor2 = Integer.parseInt(characterData[4]);
                             characterColor3 = Integer.parseInt(characterData[5]);
                         } catch (NumberFormatException ex) {
-                            return false;
+                            sendProtocolMessage(new CharacterCreationErrorMessage(CharacterCreationErrorMessage.Type.DATA_INVALID));
+                            return true;
                         }
-                        if (characterClass < 1 || characterClass > 12) return false;
-                        if (characterGender != 0 && characterGender != 1) return false;
-                        if (characterColor1 < -1 || characterColor1 > 16777215) return false;
-                        if (characterColor2 < -1 || characterColor2 > 16777215) return false;
-                        if (characterColor3 < -1 || characterColor3 > 16777215) return false;
+                        boolean invalidData = false;
+                        if (characterClass < 1 || characterClass > 12) invalidData = true;
+                        if (characterGender != 0 && characterGender != 1) invalidData = true;
+                        if (characterColor1 < -1 || characterColor1 > 16777215) invalidData = true;
+                        if (characterColor2 < -1 || characterColor2 > 16777215) invalidData = true;
+                        if (characterColor3 < -1 || characterColor3 > 16777215) invalidData = true;
+                        if (invalidData) {
+                            sendProtocolMessage(new CharacterCreationErrorMessage(CharacterCreationErrorMessage.Type.DATA_INVALID));
+                            return true;
+                        }
+                        if (characterCount >= 5) {
+                            sendProtocolMessage(new CharacterCreationErrorMessage(CharacterCreationErrorMessage.Type.NO_EMPTY_SLOT));
+                            return true;
+                        }
                         server.getAuthDatabase().getDsl().insertInto(CHARACTERS).set(CHARACTERS.ACCOUNT_ID, accountId)
                                 .set(CHARACTERS.SERVER_ID, server.getId()).set(CHARACTERS.NAME, characterName)
                                 .set(CHARACTERS.CLASS, characterClass).set(CHARACTERS.GENDER, characterGender)
