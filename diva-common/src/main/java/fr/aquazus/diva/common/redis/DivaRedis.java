@@ -14,7 +14,6 @@ public abstract class DivaRedis {
     private String ip;
     private int port;
     private int maxConnections;
-    private JedisPoolConfig poolConfig;
     private JedisPool pool;
 
     protected DivaRedis(String ip, int port, int maxConnections) {
@@ -24,7 +23,7 @@ public abstract class DivaRedis {
     }
 
     protected void connect() {
-        this.poolConfig = new JedisPoolConfig();
+        JedisPoolConfig poolConfig = new JedisPoolConfig();
         poolConfig.setTestOnBorrow(true);
         poolConfig.setMaxIdle(maxConnections);
         poolConfig.setMaxTotal(maxConnections);
@@ -56,7 +55,7 @@ public abstract class DivaRedis {
                 }
             }, "diva");
         } catch (Exception ex) {
-            log.error("An error occurred while loading Redis", ex);
+            log.error("An error occurred while connecting to Redis", ex);
             System.exit(-1);
         }
     }
