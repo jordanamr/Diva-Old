@@ -1,6 +1,7 @@
 package fr.aquazus.diva.game;
 
 import fr.aquazus.diva.common.DivaServer;
+import fr.aquazus.diva.common.logging.UncaughtExceptionLogger;
 import fr.aquazus.diva.game.database.AuthDatabase;
 import fr.aquazus.diva.game.database.GameDatabase;
 import fr.aquazus.diva.game.network.GameClient;
@@ -22,6 +23,7 @@ public class GameServer extends DivaServer {
     }
 
     public static void main(String[] args) {
+        Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionLogger());
         GameServer.getInstance().start();
     }
 
