@@ -68,7 +68,7 @@ public class GameServer extends DivaServer {
         super.listen(config.getBindIp(), config.getBindPort());
         state = AuthServersMessage.ServerState.ONLINE;
         log.info("Starting Redis communication..."); //Note, démarrer redis en tout dernier une fois le serveur prêt.
-        redis = new GameRedis(this, config.getRedisIp(), config.getRedisPort());
+        redis = new GameRedis(this, config.getRedisIp(), config.getRedisPort(), config.getRedisMaxConnections());
         new Thread(redis).start();
     }
 

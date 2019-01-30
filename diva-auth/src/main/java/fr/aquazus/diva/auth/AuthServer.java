@@ -68,7 +68,7 @@ public class AuthServer extends DivaServer {
         }
         log.info(serversCache.size() + " GameServers detected.");
         log.info("Starting Redis communication...");
-        redis = new AuthRedis(this, config.getRedisIp(), config.getRedisPort());
+        redis = new AuthRedis(this, config.getRedisIp(), config.getRedisPort(), config.getRedisMaxConnections());
         new Thread(redis).start();
         super.listen(config.getBindIp(), config.getBindPort());
     }
