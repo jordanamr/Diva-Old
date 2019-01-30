@@ -9,8 +9,8 @@ public class GameRedis extends DivaRedis implements Runnable {
 
     private final GameServer server;
 
-    public GameRedis(GameServer server, String ip, int port) {
-        super(ip, port);
+    public GameRedis(GameServer server, String ip, int port, int maxConnections) {
+        super(ip, port, maxConnections);
         this.server = server;
     }
 

@@ -10,8 +10,8 @@ public class AuthRedis extends DivaRedis implements Runnable {
 
     private final AuthServer server;
 
-    public AuthRedis(AuthServer server, String ip, int port) {
-        super(ip, port);
+    public AuthRedis(AuthServer server, String ip, int port, int maxConnections) {
+        super(ip, port, maxConnections);
         this.server = server;
     }
 

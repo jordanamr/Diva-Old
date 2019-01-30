@@ -16,6 +16,7 @@ public @Data class GameConfiguration {
 
     protected String redisIp;
     protected int redisPort;
+    protected int redisMaxConnections;
 
     protected String authDatabaseIp;
     protected int authDatabasePort;
@@ -43,6 +44,7 @@ public @Data class GameConfiguration {
             this.bindPort = Integer.parseInt(properties.getProperty("bind.port"));
             this.redisIp = properties.getProperty("redis.ip");
             this.redisPort = Integer.parseInt(properties.getProperty("redis.port"));
+            this.redisMaxConnections = Integer.parseInt(properties.getProperty("redis.maxConnections"));
             this.authDatabaseIp = properties.getProperty("database.auth.ip");
             this.authDatabasePort = Integer.parseInt(properties.getProperty("database.auth.port"));
             this.authDatabaseUsername = properties.getProperty("database.auth.username");

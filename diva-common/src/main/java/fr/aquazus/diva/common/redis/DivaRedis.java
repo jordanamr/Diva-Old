@@ -1,22 +1,38 @@
 package fr.aquazus.diva.common.redis;
 
 import lombok.extern.slf4j.Slf4j;
+import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.JedisPubSub;
 
+import java.util.concurrent.CompletableFuture;
+
 @Slf4j
 public abstract class DivaRedis {
 
-    private final JedisPoolConfig poolConfig;
-    private final JedisPool pool;
+    private String ip;
+    private int port;
+    private int maxConnections;
+    private JedisPoolConfig poolConfig;
+    private JedisPool pool;
 
-    protected DivaRedis(String ip, int port) {
-        this.poolConfig = new JedisPoolConfig();
-        this.pool = new JedisPool(poolConfig, ip, port);
+    protected DivaRedis(String ip, int port, int maxConnections) {
+        this.ip = ip;
+        this.port = port;
+        this.maxConnections = maxConnections;
     }
 
     protected void connect() {
+        this.poolConfig = new JedisPoolConfig();
+        poolConfig.setTestOnBorrow(true);
+        poolConfig.setMaxIdle(maxConnections);
+        poolConfig.setMaxTotal(maxConnections);
+        poolConfig.setBlockWhenExhausted(true);
+        poolConfig.setMinIdle(maxConnections / 4);
+        poolConfig.setMaxWaitMillis(2000);
+        this.pool = new JedisPool(poolConfig, ip, port);
+
         try {
             pool.getResource().subscribe(new JedisPubSub() {
                 @Override
@@ -47,7 +63,13 @@ public abstract class DivaRedis {
 
     protected void publish(String message) {
         log.debug("[Redis] --> " + message);
-        pool.getResource().publish("diva", message);
+        CompletableFuture.runAsync(() -> {
+            try (Jedis jedis = pool.getResource()) {
+                jedis.publish("diva", message);
+            } catch (Exception ex) {
+                log.error("An error occurred while publishing", ex);
+            }
+        });
     }
 
     protected void onReady() {

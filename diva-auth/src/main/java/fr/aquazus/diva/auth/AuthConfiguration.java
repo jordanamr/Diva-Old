@@ -16,6 +16,7 @@ public @Data class AuthConfiguration {
 
     protected String redisIp;
     protected int redisPort;
+    protected int redisMaxConnections;
 
     protected String databaseIp;
     protected int databasePort;
@@ -34,6 +35,7 @@ public @Data class AuthConfiguration {
             this.bindPort = Integer.parseInt(properties.getProperty("bind.port"));
             this.redisIp = properties.getProperty("redis.ip");
             this.redisPort = Integer.parseInt(properties.getProperty("redis.port"));
+            this.redisMaxConnections = Integer.parseInt(properties.getProperty("redis.maxConnections"));
             this.databaseIp = properties.getProperty("database.ip");
             this.databasePort = Integer.parseInt(properties.getProperty("database.port"));
             this.databaseUsername = properties.getProperty("database.username");
