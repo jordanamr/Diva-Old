@@ -15,10 +15,18 @@ public class AuthCipher {
         if (password.startsWith("#1")) password = password.substring(2);
         StringBuilder builder = new StringBuilder();
         for (int i = 0; i < password.length(); i += 2) {
-            int kChar = (int) key.charAt((i / 2));
-            int part1 = (64 + zkArray.indexOf(password.charAt(i))) - kChar;
-            int part2 = (64 + zkArray.indexOf(password.charAt(i + 1))) - kChar;
-            builder.append((char) (16 * part1 + (part2 < 0 ? part2 + 64 : part2)));
+            char keyChar = key.charAt(i / 2);
+            int index1 = zkArray.indexOf(password.charAt(i)) + zkArray.size();
+            int index2 = zkArray.indexOf(password.charAt(i + 1)) + zkArray.size();
+
+            int decodedIndex1 = index1 - (int) keyChar;
+            if (decodedIndex1 < 0) decodedIndex1 += 64;
+            decodedIndex1 *= 16;
+
+            int decodedIndex2 = index2 - (int) keyChar;
+            if (decodedIndex2 < 0) decodedIndex2 += 64;
+
+            builder.append((char) (decodedIndex1 + decodedIndex2));
         }
         return builder.toString();
     }
