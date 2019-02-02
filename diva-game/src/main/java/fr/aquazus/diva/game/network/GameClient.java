@@ -7,6 +7,7 @@ import fr.aquazus.diva.database.generated.auth.tables.pojos.Characters;
 import fr.aquazus.diva.game.GameServer;
 import fr.aquazus.diva.protocol.common.server.ServerMessage;
 import fr.aquazus.diva.protocol.game.client.CharacterDeletionMessage;
+import fr.aquazus.diva.protocol.game.client.CharacterSelectionMessage;
 import fr.aquazus.diva.protocol.game.server.CharacterCreationErrorMessage;
 import fr.aquazus.diva.protocol.game.server.CharacterListMessage;
 import fr.aquazus.diva.protocol.game.server.RandomNameMessage;
@@ -153,6 +154,7 @@ public class GameClient extends DivaClient {
                         return true;
                     case 'D':
                         CharacterDeletionMessage deletionMessage = new CharacterDeletionMessage().deserialize(packet);
+                        if (deletionMessage == null) return false;
                         Characters characterToDelete = server.getAuthDatabase().getCharactersDao().fetchOneById(deletionMessage.getCharacterId());
                         if (characterToDelete == null) {
                             disconnect("Trying to delete an unknown character", "" + deletionMessage.getCharacterId());
@@ -171,6 +173,21 @@ public class GameClient extends DivaClient {
                         sendPacket("BN");
                         sendProtocolMessage(new CharacterListMessage(remainingSubscription, characterCount, server.getAuthDatabase().getCharactersDao().fetchByAccountId(accountId)));
                         return true;
+                    case 'S':
+                        CharacterSelectionMessage selectionMessage = new CharacterSelectionMessage().deserialize(packet);
+                        if (selectionMessage == null) return false;
+                        Characters characterToUse = server.getAuthDatabase().getCharactersDao().fetchOneById(selectionMessage.getCharacterId());
+                        if (characterToUse == null) {
+                            disconnect("Trying to use an unknown character", "" + selectionMessage.getCharacterId());
+                            return true;
+                        }
+                        if (characterToUse.getAccountId() != accountId) {
+                            disconnect("Trying to use someone else's character", "" + selectionMessage.getCharacterId());
+                            return true;
+                        }
+
+                    default:
+                        return false;
                 }
         }
         return true;
