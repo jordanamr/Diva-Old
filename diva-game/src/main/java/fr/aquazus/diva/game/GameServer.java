@@ -2,11 +2,11 @@ package fr.aquazus.diva.game;
 
 import fr.aquazus.diva.common.DivaServer;
 import fr.aquazus.diva.common.logging.UncaughtExceptionLogger;
+import fr.aquazus.diva.common.protocol.server.ServerState;
 import fr.aquazus.diva.database.auth.AuthDatabase;
 import fr.aquazus.diva.database.game.GameDatabase;
 import fr.aquazus.diva.game.network.GameClient;
 import fr.aquazus.diva.game.redis.GameRedis;
-import fr.aquazus.diva.protocol.auth.server.AuthServersMessage;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import simplenet.Client;
@@ -32,7 +32,7 @@ public class GameServer extends DivaServer {
     @Getter
     private int id;
     @Getter
-    private AuthServersMessage.ServerState state;
+    private ServerState state;
     @Getter
     private Map<String, Integer> ticketsCache;
     @Getter
@@ -45,7 +45,7 @@ public class GameServer extends DivaServer {
     private GameRedis redis;
 
     private GameServer() {
-        state = AuthServersMessage.ServerState.OFFLINE;
+        state = ServerState.OFFLINE;
         config = new GameConfiguration();
         ticketsCache = Collections.synchronizedMap(new HashMap<>());
         clients = Collections.synchronizedList(new ArrayList<>());
@@ -70,7 +70,7 @@ public class GameServer extends DivaServer {
         log.info("Loading game data...");
         gameDatabase.load();
         super.listen(config.getBindIp(), config.getBindPort());
-        state = AuthServersMessage.ServerState.ONLINE;
+        state = ServerState.ONLINE;
         log.info("Starting Redis communication..."); //Note, démarrer redis en tout dernier une fois le serveur prêt.
         redis = new GameRedis(this, config.getRedisIp(), config.getRedisPort(), config.getRedisMaxConnections());
         new Thread(redis).start();

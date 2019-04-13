@@ -2,7 +2,7 @@ package fr.aquazus.diva.auth.redis;
 
 import fr.aquazus.diva.auth.AuthServer;
 import fr.aquazus.diva.common.redis.DivaRedis;
-import fr.aquazus.diva.protocol.auth.server.AuthServersMessage;
+import fr.aquazus.diva.auth.protocol.server.AuthServersMessage;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j

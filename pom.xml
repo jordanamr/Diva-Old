@@ -23,7 +23,6 @@
     </properties>
 
     <modules>
-        <module>diva-protocol</module>
         <module>diva-database</module>
         <module>diva-common</module>
         <module>diva-auth</module>

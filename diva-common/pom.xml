@@ -15,11 +15,6 @@
     <dependencies>
         <dependency>
             <groupId>fr.aquazus.diva</groupId>
-            <artifactId>diva-protocol</artifactId>
-            <version>${project.parent.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>fr.aquazus.diva</groupId>
             <artifactId>diva-database</artifactId>
             <version>${project.parent.version}</version>
         </dependency>

@@ -1,14 +1,14 @@
 package fr.aquazus.diva.auth.network;
 
 import fr.aquazus.diva.auth.AuthServer;
+import fr.aquazus.diva.auth.protocol.server.*;
 import fr.aquazus.diva.common.network.DivaClient;
 import fr.aquazus.diva.common.utils.StringUtils;
 import fr.aquazus.diva.database.generated.auth.tables.pojos.Accounts;
 import fr.aquazus.diva.database.generated.auth.tables.pojos.Characters;
-import fr.aquazus.diva.protocol.DivaProtocol;
-import fr.aquazus.diva.protocol.auth.client.AuthConnectMessage;
-import fr.aquazus.diva.protocol.auth.client.AuthSearchMessage;
-import fr.aquazus.diva.protocol.auth.server.*;
+import fr.aquazus.diva.common.protocol.DivaProtocol;
+import fr.aquazus.diva.auth.protocol.client.AuthConnectMessage;
+import fr.aquazus.diva.auth.protocol.client.AuthSearchMessage;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import simplenet.Client;

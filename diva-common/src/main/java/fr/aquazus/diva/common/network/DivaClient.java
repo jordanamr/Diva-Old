@@ -1,6 +1,6 @@
 package fr.aquazus.diva.common.network;
 
-import fr.aquazus.diva.protocol.ProtocolMessage;
+import fr.aquazus.diva.common.protocol.ProtocolMessage;
 import lombok.extern.slf4j.Slf4j;
 import simplenet.Client;
 import simplenet.packet.Packet;
