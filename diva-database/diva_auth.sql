@@ -3,15 +3,15 @@
 
  Source Server         : Localhost
  Source Server Type    : MariaDB
- Source Server Version : 100137
+ Source Server Version : 100138
  Source Host           : localhost:3306
  Source Schema         : diva_auth
 
  Target Server Type    : MariaDB
- Target Server Version : 100137
+ Target Server Version : 100138
  File Encoding         : 65001
 
- Date: 02/02/2019 23:49:58
+ Date: 13/04/2019 22:21:44
 */
 
 SET NAMES utf8mb4;
@@ -50,18 +50,35 @@ CREATE TABLE `characters`  (
   `account_id` int(11) NOT NULL,
   `server_id` int(11) NOT NULL,
   `name` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `level` mediumint(3) NOT NULL DEFAULT 1,
   `class` tinyint(2) NOT NULL DEFAULT 1,
   `gender` tinyint(1) NOT NULL DEFAULT 0,
-  `gfx_id` int(11) NOT NULL DEFAULT 1010,
-  `color1` int(8) NOT NULL DEFAULT -1,
-  `color2` int(8) NOT NULL DEFAULT -1,
-  `color3` int(8) NOT NULL DEFAULT -1,
+  `gfx_id` smallint(4) NOT NULL DEFAULT 1010,
+  `color1` int(11) NOT NULL DEFAULT -1,
+  `color2` int(11) NOT NULL DEFAULT -1,
+  `color3` int(11) NOT NULL DEFAULT -1,
+  `level` mediumint(7) NOT NULL DEFAULT 1,
+  `xp` bigint(19) NOT NULL DEFAULT 0,
+  `hp` int(11) NOT NULL DEFAULT 55,
+  `energy` smallint(5) NOT NULL DEFAULT 10000,
+  `kamas` int(11) NOT NULL DEFAULT 0,
+  `capital_stats` smallint(4) NOT NULL DEFAULT 0,
+  `capital_spells` smallint(4) NOT NULL DEFAULT 0,
+  `align_id` tinyint(1) NOT NULL DEFAULT 0,
+  `align_level` tinyint(3) NOT NULL DEFAULT 0,
+  `align_rank` tinyint(2) NOT NULL DEFAULT 0,
+  `align_honor` smallint(5) NOT NULL DEFAULT 0,
+  `align_dishonor` smallint(5) NOT NULL DEFAULT 0,
+  `align_wings` tinyint(1) NOT NULL DEFAULT 0,
   `is_merchant` tinyint(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`, `account_id`) USING BTREE,
   UNIQUE INDEX `name`(`name`) USING BTREE,
   UNIQUE INDEX `id`(`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Compact;
+) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Compact;
+
+-- ----------------------------
+-- Records of characters
+-- ----------------------------
+INSERT INTO `characters` VALUES (1, 1, 900, 'Cry-Warre', 3, 0, 30, -1, -1, -1, 1, 0, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
 
 -- ----------------------------
 -- Table structure for ranks
