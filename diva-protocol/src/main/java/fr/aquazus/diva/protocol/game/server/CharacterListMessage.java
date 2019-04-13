@@ -39,7 +39,7 @@ public @Data class CharacterListMessage extends ProtocolMessage {
             builder.append(",,,,;"); //TODO cac , coiffe , cape , fami , bouclier
             builder.append(characterPojo.getIsMerchant()).append(";");
             builder.append(characterPojo.getServerId()).append(";");
-            builder.append(";;"); //TODO isDead ; deathCount ; lvlMax
+            builder.append(";;"); //TODO isDead ; deathCount ; lvlMax (heroic)
             if (iterator.hasNext()) {
                 builder.append("|");
             }

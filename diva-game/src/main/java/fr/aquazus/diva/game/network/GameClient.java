@@ -10,7 +10,9 @@ import fr.aquazus.diva.protocol.game.client.CharacterDeletionMessage;
 import fr.aquazus.diva.protocol.game.client.CharacterSelectionMessage;
 import fr.aquazus.diva.protocol.game.server.CharacterCreationErrorMessage;
 import fr.aquazus.diva.protocol.game.server.CharacterListMessage;
+import fr.aquazus.diva.protocol.game.server.CharacterStatsMessage;
 import fr.aquazus.diva.protocol.game.server.RandomNameMessage;
+import fr.aquazus.diva.protocol.game.server.containers.CharacterStatsContainer;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import simplenet.Client;
@@ -144,7 +146,7 @@ public class GameClient extends DivaClient {
                         server.getAuthDatabase().getDsl().insertInto(CHARACTERS).set(CHARACTERS.ACCOUNT_ID, accountId)
                                 .set(CHARACTERS.SERVER_ID, server.getId()).set(CHARACTERS.NAME, characterName)
                                 .set(CHARACTERS.CLASS, characterClass).set(CHARACTERS.GENDER, characterGender)
-                                .set(CHARACTERS.GFX_ID, Integer.parseInt(characterClass + "" + characterGender))
+                                .set(CHARACTERS.GFX_ID, Short.parseShort(characterClass + "" + characterGender))
                                 .set(CHARACTERS.COLOR1, characterColor1).set(CHARACTERS.COLOR2, characterColor2)
                                 .set(CHARACTERS.COLOR3, characterColor3).execute();
                         characterCount++;
@@ -185,7 +187,8 @@ public class GameClient extends DivaClient {
                             disconnect("Trying to use someone else's character", "" + selectionMessage.getCharacterId());
                             return true;
                         }
-
+                        sendProtocolMessage(new CharacterStatsMessage(characterToUse, new CharacterStatsContainer()));
+                        sendPacket("Rx0"); //TODO Mount XP
                     default:
                         return false;
                 }
