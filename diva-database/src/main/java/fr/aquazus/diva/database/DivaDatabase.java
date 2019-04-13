@@ -14,7 +14,7 @@ public abstract class DivaDatabase {
         this.url = String.format("jdbc:mariadb://%s/%s?user=%s&password=%s&maxPoolSize=%s", server, database, username, password, poolSize);
     }
 
-    protected void connect() throws SQLException {
+    protected void connect() {
         pool = new MariaDbPoolDataSource(url);
     }
 

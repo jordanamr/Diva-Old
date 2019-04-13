@@ -1,4 +1,4 @@
-package fr.aquazus.diva.game.database;
+package fr.aquazus.diva.database.auth;
 
 import fr.aquazus.diva.database.DivaDatabase;
 import fr.aquazus.diva.database.generated.auth.tables.daos.AccountsDao;
@@ -17,6 +17,13 @@ import java.sql.SQLException;
 @Slf4j
 public class AuthDatabase extends DivaDatabase {
 
+    private static AuthDatabase INSTANCE = null;
+
+    public static AuthDatabase getInstance() {
+        if (INSTANCE == null) throw new IllegalStateException();
+        return INSTANCE;
+    }
+
     @Getter
     private DSLContext dsl;
     @Getter
@@ -30,6 +37,7 @@ public class AuthDatabase extends DivaDatabase {
 
     public AuthDatabase(String server, String username, String password, String database, int poolSize) {
         super(server, username, password, database, poolSize);
+        INSTANCE = this;
     }
 
     public void connect() {
@@ -41,7 +49,7 @@ public class AuthDatabase extends DivaDatabase {
             this.serversDao = new ServersDao(dsl.configuration());
             this.charactersDao = new CharactersDao(dsl.configuration());
             log.info("Successfully connected to auth database.");
-        } catch (SQLException ex) {
+        } catch (Exception ex) {
             log.error("A fatal error occured while connecting to the auth database", ex);
             System.exit(-1);
         }

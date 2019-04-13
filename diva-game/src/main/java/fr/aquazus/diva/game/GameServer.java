@@ -2,8 +2,8 @@ package fr.aquazus.diva.game;
 
 import fr.aquazus.diva.common.DivaServer;
 import fr.aquazus.diva.common.logging.UncaughtExceptionLogger;
-import fr.aquazus.diva.game.database.AuthDatabase;
-import fr.aquazus.diva.game.database.GameDatabase;
+import fr.aquazus.diva.database.auth.AuthDatabase;
+import fr.aquazus.diva.database.game.GameDatabase;
 import fr.aquazus.diva.game.network.GameClient;
 import fr.aquazus.diva.game.redis.GameRedis;
 import fr.aquazus.diva.protocol.auth.server.AuthServersMessage;
@@ -67,6 +67,8 @@ public class GameServer extends DivaServer {
         gameDatabase = new GameDatabase(config.getGameDatabaseIp() + ":" + config.getGameDatabasePort(), config.getGameDatabaseUsername(),
                 config.getGameDatabasePassword(), config.getGameDatabaseName(), config.getGameDatabasePool());
         gameDatabase.connect();
+        log.info("Loading game data...");
+        gameDatabase.load();
         super.listen(config.getBindIp(), config.getBindPort());
         state = AuthServersMessage.ServerState.ONLINE;
         log.info("Starting Redis communication..."); //Note, démarrer redis en tout dernier une fois le serveur prêt.

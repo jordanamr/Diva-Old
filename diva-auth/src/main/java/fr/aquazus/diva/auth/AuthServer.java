@@ -1,17 +1,16 @@
 package fr.aquazus.diva.auth;
 
-import fr.aquazus.diva.auth.database.AuthDatabase;
 import fr.aquazus.diva.auth.network.AuthCipher;
 import fr.aquazus.diva.auth.network.AuthClient;
 import fr.aquazus.diva.auth.redis.AuthRedis;
 import fr.aquazus.diva.common.DivaServer;
 import fr.aquazus.diva.common.logging.UncaughtExceptionLogger;
+import fr.aquazus.diva.database.auth.AuthDatabase;
 import fr.aquazus.diva.database.generated.auth.tables.pojos.Servers;
 import fr.aquazus.diva.protocol.auth.server.AuthServersMessage;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import simplenet.Client;
-import simplenet.Server;
 
 import java.util.*;
 
