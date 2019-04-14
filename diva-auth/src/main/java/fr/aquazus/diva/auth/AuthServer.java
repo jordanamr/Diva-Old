@@ -85,4 +85,15 @@ public class AuthServer extends DivaServer {
             if (client.getState() == AuthClient.State.SELECT_SERVER) client.updateServersData();
         }
     }
+
+    public boolean isAccountOnline(int id) {
+        boolean result = false;
+        for (AuthClient client : clients) {
+            if (client.getAccountId() == id) {
+                result = true;
+                break;
+            }
+        }
+        return result;
+    }
 }

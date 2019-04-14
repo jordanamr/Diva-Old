@@ -25,6 +25,7 @@ public class AuthClient extends DivaClient implements DivaProtocol {
     private String authKey;
     @Getter
     private State state;
+    @Getter
     private int accountId;
     private String accountNickname;
     private String accountSecretQuestion;
@@ -85,6 +86,11 @@ public class AuthClient extends DivaClient implements DivaProtocol {
                 if (!password.equals(accountPojo.getPassword())) {
                     sendProtocolMessage(new AuthErrorMessage(AuthErrorMessage.Type.BAD_LOGIN));
                     disconnect("Wrong password", username);
+                    return true;
+                }
+                if (server.isAccountOnline(accountPojo.getId())) {
+                    sendProtocolMessage(new AuthErrorMessage(AuthErrorMessage.Type.ALREADY_LOGGED));
+                    disconnect("Already logged in", username);
                     return true;
                 }
                 this.accountId = accountPojo.getId();
