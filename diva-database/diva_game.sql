@@ -11,7 +11,7 @@
  Target Server Version : 100138
  File Encoding         : 65001
 
- Date: 13/04/2019 22:20:22
+ Date: 15/04/2019 01:55:38
 */
 
 SET NAMES utf8mb4;
@@ -233,5 +233,21 @@ INSERT INTO `experience_table` VALUES (197, 3257146000, -1, -1, -1);
 INSERT INTO `experience_table` VALUES (198, 3474606000, -1, -1, -1);
 INSERT INTO `experience_table` VALUES (199, 3703616000, -1, -1, -1);
 INSERT INTO `experience_table` VALUES (200, 7407232000, -1, -1, -1);
+
+-- ----------------------------
+-- Table structure for maps
+-- ----------------------------
+DROP TABLE IF EXISTS `maps`;
+CREATE TABLE `maps`  (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `date` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `key` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL,
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 7575 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Compact;
+
+-- ----------------------------
+-- Records of maps
+-- ----------------------------
+INSERT INTO `maps` VALUES (7573, '0808281607', '3b552d345a6b2260303e40533b55234b30625560544341506476244e7d2121467f697b6c27644523315f542532423849683c7f3665483e6356713f27225c6159547b482063744a7a69453452355337403f272d744a2d7338484d6955614c2d395729587e62636b4b356c7658623c4b33277c363b3f4e497d6c762d3939286f7132755741677520372050554b7c5f6c417a752c4f7c7579566f502672427065');
 
 SET FOREIGN_KEY_CHECKS = 1;

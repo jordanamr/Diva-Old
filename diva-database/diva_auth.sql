@@ -11,7 +11,7 @@
  Target Server Version : 100138
  File Encoding         : 65001
 
- Date: 13/04/2019 22:21:44
+ Date: 15/04/2019 01:55:34
 */
 
 SET NAMES utf8mb4;
@@ -31,6 +31,10 @@ CREATE TABLE `accounts`  (
   `remaining_subscription` int(11) NOT NULL DEFAULT -1,
   `rank` int(11) NOT NULL DEFAULT 1,
   `community` tinyint(2) NOT NULL DEFAULT 0,
+  `last_ip` varchar(15) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
+  `last_online` datetime(0) NULL DEFAULT NULL,
+  `chat_channels` varchar(9) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '*#%!$:?pi',
+  `notifications_friends` tinyint(1) NOT NULL DEFAULT 1,
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `username`(`username`) USING BTREE,
   UNIQUE INDEX `nickname`(`nickname`) USING BTREE
@@ -39,7 +43,7 @@ CREATE TABLE `accounts`  (
 -- ----------------------------
 -- Records of accounts
 -- ----------------------------
-INSERT INTO `accounts` VALUES (1, 'test', 'test', 'test', 'Supprimer ?', 'oui', -1, 1, 0);
+INSERT INTO `accounts` VALUES (1, 'test', 'test', 'test', 'Supprimer ?', 'oui', -1, 1, 0, NULL, NULL, '*#%!$:?pi', 1);
 
 -- ----------------------------
 -- Table structure for characters
@@ -50,7 +54,7 @@ CREATE TABLE `characters`  (
   `account_id` int(11) NOT NULL,
   `server_id` int(11) NOT NULL,
   `name` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `class` tinyint(2) NOT NULL DEFAULT 1,
+  `breed` tinyint(2) NOT NULL DEFAULT 1,
   `gender` tinyint(1) NOT NULL DEFAULT 0,
   `gfx_id` smallint(4) NOT NULL DEFAULT 1010,
   `color1` int(11) NOT NULL DEFAULT -1,
@@ -70,15 +74,14 @@ CREATE TABLE `characters`  (
   `align_dishonor` smallint(5) NOT NULL DEFAULT 0,
   `align_wings` tinyint(1) NOT NULL DEFAULT 0,
   `is_merchant` tinyint(1) NOT NULL DEFAULT 0,
+  `restrictions` mediumint(5) NOT NULL DEFAULT 8192,
+  `base_stats` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '0,0,0,0,0,0',
+  `map_id` int(11) NOT NULL,
+  `cell_id` int(11) NOT NULL,
   PRIMARY KEY (`id`, `account_id`) USING BTREE,
   UNIQUE INDEX `name`(`name`) USING BTREE,
   UNIQUE INDEX `id`(`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Compact;
-
--- ----------------------------
--- Records of characters
--- ----------------------------
-INSERT INTO `characters` VALUES (1, 1, 900, 'Cry-Warre', 3, 0, 30, -1, -1, -1, 1, 0, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Compact;
 
 -- ----------------------------
 -- Table structure for ranks
