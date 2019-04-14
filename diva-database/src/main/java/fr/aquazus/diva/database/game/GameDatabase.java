@@ -1,6 +1,8 @@
 package fr.aquazus.diva.database.game;
 
 import fr.aquazus.diva.database.DivaDatabase;
+import fr.aquazus.diva.database.generated.game.tables.records.ExperienceTableRecord;
+import fr.aquazus.diva.database.generated.game.tables.records.MapsRecord;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.jooq.DSLContext;
@@ -9,6 +11,11 @@ import org.jooq.impl.DSL;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
+import static fr.aquazus.diva.database.generated.game.Tables.MAPS;
 
 @Slf4j
 public class GameDatabase extends DivaDatabase {
@@ -24,6 +31,8 @@ public class GameDatabase extends DivaDatabase {
     private DSLContext dsl;
     @Getter
     private ExperienceTable experienceTable;
+    @Getter
+    private Map<Integer, String[]> mapsData;
 
     public GameDatabase(String server, String username, String password, String database, int poolSize) {
         super(server, username, password, database, poolSize);
@@ -44,6 +53,11 @@ public class GameDatabase extends DivaDatabase {
     public void load() {
         log.info("Loading experience table...");
         experienceTable = new ExperienceTable(dsl);
+        log.info("Loading maps...");
+        mapsData = Collections.synchronizedMap(new HashMap<>());
+        for (MapsRecord mapRecord : dsl.selectFrom(MAPS).fetch()) {
+            mapsData.put(mapRecord.getId(), new String[]{mapRecord.getDate(), mapRecord.getKey()});
+        }
     }
 
     public Connection getConnection() {

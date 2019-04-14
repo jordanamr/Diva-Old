@@ -6,6 +6,7 @@ import fr.aquazus.diva.common.protocol.server.ServerState;
 import fr.aquazus.diva.database.auth.AuthDatabase;
 import fr.aquazus.diva.database.game.GameDatabase;
 import fr.aquazus.diva.game.network.GameClient;
+import fr.aquazus.diva.game.network.maps.MapsManager;
 import fr.aquazus.diva.game.redis.GameRedis;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -43,12 +44,15 @@ public class GameServer extends DivaServer {
     private GameDatabase gameDatabase;
     @Getter
     private GameRedis redis;
+    @Getter
+    private MapsManager mapsManager;
 
     private GameServer() {
         state = ServerState.OFFLINE;
         config = new GameConfiguration();
         ticketsCache = Collections.synchronizedMap(new HashMap<>());
         clients = Collections.synchronizedList(new ArrayList<>());
+        mapsManager = new MapsManager(this);
     }
 
     private void start() {
@@ -79,5 +83,16 @@ public class GameServer extends DivaServer {
     @Override
     protected void onClientConnect(Client netClient, String clientIp) {
         this.clients.add(new GameClient(this, netClient, clientIp));
+    }
+
+    public boolean isAccountOnline(int id) {
+        boolean result = false;
+        for (GameClient client : clients) {
+            if (client.getAccountId() == id) {
+                result = true;
+                break;
+            }
+        }
+        return result;
     }
 }

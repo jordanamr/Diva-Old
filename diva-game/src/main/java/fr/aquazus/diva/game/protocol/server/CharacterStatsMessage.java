@@ -2,25 +2,25 @@ package fr.aquazus.diva.game.protocol.server;
 
 import fr.aquazus.diva.database.game.ExperienceTable;
 import fr.aquazus.diva.database.game.GameDatabase;
-import fr.aquazus.diva.database.generated.auth.tables.pojos.Characters;
 import fr.aquazus.diva.common.protocol.ProtocolMessage;
-import fr.aquazus.diva.game.protocol.containers.CharacterStatsContainer;
+import fr.aquazus.diva.game.network.player.Character;
+import fr.aquazus.diva.game.network.player.CharacterStats;
 import lombok.Data;
 
 public @Data class CharacterStatsMessage extends ProtocolMessage {
 
-    private Characters character;
-    private CharacterStatsContainer sc;
+    private Character character;
+    private CharacterStats sc;
+    private ExperienceTable experienceTable;
 
-    public CharacterStatsMessage(Characters character, CharacterStatsContainer statsContainer) {
+    public CharacterStatsMessage(Character character) {
         this.character = character;
-        this.sc = statsContainer;
+        this.sc = character.getStats();
+        this.experienceTable = GameDatabase.getInstance().getExperienceTable();
     }
 
     @Override
     public String serialize() {
-        ExperienceTable experienceTable = GameDatabase.getInstance().getExperienceTable();
-
         StringBuilder builder = new StringBuilder("As");
 
         builder.append(character.getXp()).append(','); //xp
@@ -36,10 +36,10 @@ public @Data class CharacterStatsMessage extends ProtocolMessage {
         builder.append(character.getAlignRank()).append(','); //alignRank
         builder.append(character.getAlignHonor()).append(','); //alignHonor
         builder.append(character.getAlignDishonor()).append(','); //alignDishonor
-        builder.append(character.getAlignWings()).append('|'); //alignWings
+        builder.append(character.isWingsEnabled()).append('|'); //alignWings
 
         builder.append(character.getHp()).append(','); //hp
-        builder.append(sc.getVitality()[4]).append('|'); //maxHp
+        builder.append(character.getMaxHp()).append('|'); //maxHp
 
         builder.append(character.getEnergy()).append(','); //energy
         builder.append(10000).append('|'); //maxEnergy
