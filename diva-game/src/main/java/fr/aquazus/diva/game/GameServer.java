@@ -5,6 +5,7 @@ import fr.aquazus.diva.common.logging.UncaughtExceptionLogger;
 import fr.aquazus.diva.common.protocol.server.ServerState;
 import fr.aquazus.diva.database.auth.AuthDatabase;
 import fr.aquazus.diva.database.game.GameDatabase;
+import fr.aquazus.diva.game.network.GameCipher;
 import fr.aquazus.diva.game.network.GameClient;
 import fr.aquazus.diva.game.network.maps.MapsManager;
 import fr.aquazus.diva.game.redis.GameRedis;
@@ -39,6 +40,8 @@ public class GameServer extends DivaServer {
     @Getter
     private final List<GameClient> clients;
     @Getter
+    private GameCipher gameCipher;
+    @Getter
     private AuthDatabase authDatabase;
     @Getter
     private GameDatabase gameDatabase;
@@ -52,6 +55,7 @@ public class GameServer extends DivaServer {
         config = new GameConfiguration("game.properties");
         ticketsCache = Collections.synchronizedMap(new HashMap<>());
         clients = Collections.synchronizedList(new ArrayList<>());
+        gameCipher = new GameCipher();
         mapsManager = new MapsManager(this);
     }
 

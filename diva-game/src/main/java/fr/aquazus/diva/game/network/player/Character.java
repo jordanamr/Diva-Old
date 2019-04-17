@@ -99,6 +99,7 @@ public @Data class Character {
 
     public void broadcastMovement(String path) {
         if (this.currentMap == null) return;
+        //TODO Null path = invalid request
         if (path.contains("|")) {
             String[] pathData = path.split("\\|");
             currentMap.moveCharacter(this, pathData[1]);

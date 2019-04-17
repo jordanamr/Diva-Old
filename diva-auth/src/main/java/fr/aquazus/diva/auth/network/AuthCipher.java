@@ -1,14 +1,11 @@
 package fr.aquazus.diva.auth.network;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
+import fr.aquazus.diva.common.network.DivaCipher;
 
-public class AuthCipher {
+import java.util.concurrent.ThreadLocalRandom;
 
-    private final List<Character> zkArray = Arrays.asList('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '-', '_');
+public class AuthCipher extends DivaCipher {
+
     private final String ticketChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
     public String decodePassword(String password, String key) {
@@ -51,16 +48,6 @@ public class AuthCipher {
         return new String(obfIp) + new String(obfPort);
     }
 
-    private String int2ip(int ip) {
-        return IntStream.of(
-                ip >> 24 & 0xff,
-                ip >> 16 & 0xff,
-                ip >> 8 & 0xff,
-                ip & 0xff)
-                .mapToObj(Integer::toString)
-                .collect(Collectors.joining("."));
-    }
-
     private int ip2int(String ip) {
         String[] parts = ip.split("\\.");
         int iip = 0;
@@ -70,18 +57,10 @@ public class AuthCipher {
         return iip;
     }
 
-    private int decode64(char data) {
-        return zkArray.indexOf(data);
-    }
-
-    private char encode64(int data) {
-        return zkArray.get(data);
-    }
-
     public String generateTicket() {
         StringBuilder builder = new StringBuilder(11);
-        for (int i = 0; i < 11; i++) {
-            builder.append(ticketChars.charAt(new Random().nextInt(ticketChars.length())));
+        for (int i = 0; i < builder.capacity(); i++) {
+            builder.append(ticketChars.charAt(ThreadLocalRandom.current().nextInt(ticketChars.length())));
         }
         return builder.toString();
     }
