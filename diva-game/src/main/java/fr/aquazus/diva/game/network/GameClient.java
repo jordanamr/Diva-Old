@@ -171,8 +171,9 @@ public class GameClient extends DivaClient {
                                         .set(CHARACTERS.BREED, characterBreed).set(CHARACTERS.GENDER, characterGender)
                                         .set(CHARACTERS.GFX_ID, Short.parseShort(characterBreed + "" + characterGender))
                                         .set(CHARACTERS.COLOR1, characterColor1).set(CHARACTERS.COLOR2, characterColor2)
-                                        .set(CHARACTERS.COLOR3, characterColor3).set(CHARACTERS.MAP_ID, 7573)
-                                        .set(CHARACTERS.CELL_ID, 384).execute();
+                                        .set(CHARACTERS.COLOR3, characterColor3).set(CHARACTERS.LEVEL, server.getConfig().getStartLevel())
+                                        .set(CHARACTERS.KAMAS, server.getConfig().getStartKamas()).set(CHARACTERS.MAP_ID, server.getConfig().getStartMapId())
+                                        .set(CHARACTERS.CELL_ID, server.getConfig().getStartMapCell()).execute();
                                 characterCount++;
                                 sendPacket("BN");
                                 sendPacket("AAK");

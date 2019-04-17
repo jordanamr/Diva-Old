@@ -34,6 +34,11 @@ public @Data class GameConfiguration extends DivaConfiguration {
 
     protected int serverId;
 
+    protected int startMapId;
+    protected int startMapCell;
+    protected int startLevel;
+    protected int startKamas;
+
     GameConfiguration(String fileName) {
         super(fileName);
     }
@@ -63,6 +68,10 @@ public @Data class GameConfiguration extends DivaConfiguration {
             this.gameDatabaseName = properties.getProperty("database.game.name");
             this.gameDatabasePool = Integer.parseInt(properties.getProperty("database.game.pool"));
             this.serverId = Integer.parseInt(properties.getProperty("server.id"));
+            this.startMapId = Integer.parseInt(properties.getProperty("start.map.id"));
+            this.startMapCell = Integer.parseInt(properties.getProperty("start.map.cell"));
+            this.startLevel = Integer.parseInt(properties.getProperty("start.level"));
+            this.startKamas = Integer.parseInt(properties.getProperty("start.kamas"));
         }
     }
 }
