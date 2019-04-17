@@ -1,7 +1,9 @@
 package fr.aquazus.diva.game.protocol.common;
 
+import fr.aquazus.diva.common.network.DivaClient;
 import fr.aquazus.diva.common.protocol.ProtocolMessage;
 import fr.aquazus.diva.game.network.GameCipher;
+import fr.aquazus.diva.game.network.GameClient;
 import lombok.Data;
 
 import java.util.*;
@@ -32,12 +34,25 @@ public @Data class GameActionMessage extends ProtocolMessage {
     @Override
     public GameActionMessage deserialize(String data) {
         action = Action.valueOf(Integer.parseInt(data.substring(0, 3)));
-        if (action == null) return this;
+        if (action == null) return null;
         switch (action) {
             case MOVEMENT:
                 actionData = cipher.extractFullPath(data.substring(3), 5000);
+                return this;
+            default:
+                return null;
         }
-        return this;
+    }
+
+    @Override
+    public boolean handle(DivaClient netClient, String packet) {
+        GameClient client = (GameClient) netClient;
+        if (deserialize(packet.substring(2)) == null) return false;
+        switch (action) {
+            case MOVEMENT:
+                client.getCharacter().broadcastMovement(makeNewPath(client.getCharacter().getCellId()));
+        }
+        return true;
     }
 
     public enum Action {

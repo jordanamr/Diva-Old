@@ -1,10 +1,12 @@
 package fr.aquazus.diva.game.network;
 
 import fr.aquazus.diva.common.network.DivaCipher;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+@Slf4j
 public class GameCipher extends DivaCipher {
     private static GameCipher instance = null;
 
@@ -22,6 +24,7 @@ public class GameCipher extends DivaCipher {
             if (cellId < 0 || cellId > mapSize) return null;
             fullPath.put(cellId, direction);
         }
+        log.debug(fullPath.toString());
         return fullPath;
     }
 

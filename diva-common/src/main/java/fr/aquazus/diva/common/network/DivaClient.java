@@ -1,6 +1,7 @@
 package fr.aquazus.diva.common.network;
 
 import fr.aquazus.diva.common.protocol.ProtocolMessage;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import simplenet.Client;
 import simplenet.packet.Packet;
@@ -14,6 +15,7 @@ public abstract class DivaClient {
 
     private boolean disconnected = false;
     private Client netClient;
+    @Getter
     protected String ip;
 
     protected DivaClient(Client netClient, String ip) {
@@ -41,7 +43,7 @@ public abstract class DivaClient {
         onReady();
     }
 
-    protected void log(String message) {
+    public void log(String message) {
         String format = "[" + ip + "] " + message;
         if (message.startsWith("-->") || message.startsWith("<--")) {
             log.debug(format);
@@ -50,11 +52,11 @@ public abstract class DivaClient {
         }
     }
 
-    protected void sendProtocolMessage(ProtocolMessage message) {
+    public void sendProtocolMessage(ProtocolMessage message) {
         sendPacket(message.serialize());
     }
 
-    protected void sendPacket(String packet) {
+    public void sendPacket(String packet) {
         try {
             byte[] data = (packet + "\0").getBytes(StandardCharsets.UTF_8);
             this.log("--> " + packet);
@@ -68,7 +70,7 @@ public abstract class DivaClient {
         }
     }
 
-    protected void disconnect(String... reason) {
+    public void disconnect(String... reason) {
         if (disconnected) return;
         disconnected = true;
         log("disconnected!" + (reason.length != 0 ? " " + Arrays.toString(reason) : ""));

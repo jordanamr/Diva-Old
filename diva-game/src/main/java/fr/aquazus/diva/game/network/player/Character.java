@@ -3,6 +3,7 @@ package fr.aquazus.diva.game.network.player;
 import fr.aquazus.diva.database.generated.auth.tables.pojos.Characters;
 import fr.aquazus.diva.game.network.GameClient;
 import fr.aquazus.diva.game.network.maps.GameMap;
+import fr.aquazus.diva.game.protocol.client.ChatMessage;
 import fr.aquazus.diva.game.protocol.server.GameMovementMessage;
 import fr.aquazus.diva.game.protocol.server.MapDataMessage;
 import lombok.Data;
@@ -109,15 +110,17 @@ public @Data class Character {
         }
     }
 
-    public void sendMessage(String channel, String message) {
-        if (channel.equals("K") && currentMap != null) {
-            currentMap.sendMessage(this, message);
+    public void talk(ChatMessage.Channel channel, String message) {
+        if (message.isBlank()) return;
+        switch (channel) {
+            case GENERAL:
+                if (currentMap != null) currentMap.sendMessage(this, message);
         }
     }
 
     public void sendSmiley(int id) {
         if (currentMap != null) {
-            currentMap.sendSmiley(this, id);
+            currentMap.sendSmiley(this.id, id);
         }
     }
 }

@@ -53,9 +53,9 @@ public class GameMap {
         }
     }
 
-    public void sendSmiley(Character character, int id) {
+    public void sendSmiley(int spriteId, int id) {
         for (Character characters : charactersOnMap) {
-            characters.getClient().sendPacket("cS" + character.getId() + "|" + id);
+            characters.getClient().sendPacket("cS" + spriteId + "|" + id);
         }
     }
 
