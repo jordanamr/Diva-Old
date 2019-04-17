@@ -10,11 +10,10 @@ import fr.aquazus.diva.common.protocol.server.ServerMessage;
 import fr.aquazus.diva.game.network.player.Character;
 import fr.aquazus.diva.game.protocol.client.CharacterDeletionMessage;
 import fr.aquazus.diva.game.protocol.client.CharacterSelectionMessage;
-import fr.aquazus.diva.game.protocol.client.GameActionMessage;
+import fr.aquazus.diva.game.protocol.common.GameActionMessage;
 import fr.aquazus.diva.game.protocol.server.*;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import redis.clients.jedis.Protocol;
 import simplenet.Client;
 
 import java.sql.Timestamp;

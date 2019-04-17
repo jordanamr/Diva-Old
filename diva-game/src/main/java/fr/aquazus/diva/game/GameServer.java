@@ -75,7 +75,7 @@ public class GameServer extends DivaServer {
         gameDatabase.load();
         super.listen(config.getBindIp(), config.getBindPort());
         state = ServerState.ONLINE;
-        log.info("Starting Redis communication..."); //Note, démarrer redis en tout dernier une fois le serveur prêt.
+        log.info("Starting Redis communication...");
         redis = new GameRedis(this, config.getRedisIp(), config.getRedisPort(), config.getRedisMaxConnections());
         new Thread(redis).start();
     }
@@ -86,13 +86,6 @@ public class GameServer extends DivaServer {
     }
 
     public boolean isAccountOnline(int id) {
-        boolean result = false;
-        for (GameClient client : clients) {
-            if (client.getAccountId() == id) {
-                result = true;
-                break;
-            }
-        }
-        return result;
+        return clients.stream().map(GameClient::getAccountId).anyMatch(i -> i == id);
     }
 }

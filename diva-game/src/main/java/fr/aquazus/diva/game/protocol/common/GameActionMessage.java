@@ -1,4 +1,4 @@
-package fr.aquazus.diva.game.protocol.client;
+package fr.aquazus.diva.game.protocol.common;
 
 import fr.aquazus.diva.common.protocol.ProtocolMessage;
 import lombok.Data;

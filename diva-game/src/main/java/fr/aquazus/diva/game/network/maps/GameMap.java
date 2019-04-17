@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 import fr.aquazus.diva.game.network.player.Character;
-import fr.aquazus.diva.game.protocol.client.GameActionMessage;
+import fr.aquazus.diva.game.protocol.common.GameActionMessage;
 import fr.aquazus.diva.game.protocol.server.GameMovementMessage;
 import lombok.Getter;
 
