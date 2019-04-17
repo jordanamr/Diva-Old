@@ -44,7 +44,7 @@ public class AuthServer extends DivaServer {
     private Map<Integer, String> serversIpCache;
 
     private AuthServer() {
-        config = new AuthConfiguration();
+        config = new AuthConfiguration("auth.properties");
         clients = Collections.synchronizedList(new ArrayList<>());
         cipher = new AuthCipher();
         serversCache = Collections.synchronizedMap(new HashMap<>());

@@ -1,5 +1,6 @@
 package fr.aquazus.diva.auth;
 
+import fr.aquazus.diva.common.DivaConfiguration;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
@@ -8,9 +9,8 @@ import java.io.IOException;
 import java.util.Properties;
 
 @Slf4j
-public @Data class AuthConfiguration {
+public @Data class AuthConfiguration extends DivaConfiguration {
 
-    public static boolean debug;
     protected String bindIp;
     protected int bindPort;
 
@@ -25,10 +25,15 @@ public @Data class AuthConfiguration {
     protected String databaseName;
     protected int databasePool;
 
-    void read() throws IOException, NumberFormatException {
-        log.info("Reading auth.properties...");
+    AuthConfiguration(String fileName) {
+        super(fileName);
+    }
+
+    @Override
+    public void read() throws IOException, NumberFormatException {
+        log.info("Reading " + super.getFileName() + "...");
         Properties properties = new Properties();
-        try (FileInputStream fileInputStream = new FileInputStream("auth.properties")) {
+        try (FileInputStream fileInputStream = new FileInputStream(super.getFileName())) {
             properties.load(fileInputStream);
             debug = Boolean.parseBoolean(properties.getProperty("debug"));
             this.bindIp = properties.getProperty("bind.ip");

@@ -49,7 +49,7 @@ public class GameServer extends DivaServer {
 
     private GameServer() {
         state = ServerState.OFFLINE;
-        config = new GameConfiguration();
+        config = new GameConfiguration("game.properties");
         ticketsCache = Collections.synchronizedMap(new HashMap<>());
         clients = Collections.synchronizedList(new ArrayList<>());
         mapsManager = new MapsManager(this);
