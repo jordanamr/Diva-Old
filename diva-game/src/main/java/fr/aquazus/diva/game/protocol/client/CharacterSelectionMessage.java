@@ -43,6 +43,11 @@ public @Data class CharacterSelectionMessage extends ProtocolMessage {
         }
         client.setCharacter(new Character(client, characterToUse));
         client.setState(GameClient.State.INGAME);
+        client.getServer().getClients().stream().filter(c -> c.getFriends().contains(client.getAccountId())).forEach(c -> {
+            if (c.isNotificationsFriends()) {
+                c.sendProtocolMessage(new ImMessage("0143", client.getNickname() + " (<b><a href=\"asfunction:onHref,ShowPlayerPopupMenu," + characterToUse.getName() + "\">" + characterToUse.getName() + "</a></b>)"));
+            }
+        });
         client.sendProtocolMessage(new CharacterStatsMessage(client.getCharacter()));
         client.sendPacket("Rx0"); //TODO Mount XP
         client.sendProtocolMessage(new CharacterSelectedMessage(client.getCharacter()));
