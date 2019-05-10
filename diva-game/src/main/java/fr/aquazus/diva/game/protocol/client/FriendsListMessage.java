@@ -11,25 +11,29 @@ import static fr.aquazus.diva.database.generated.auth.Tables.ACCOUNTS;
 
 public @Data class FriendsListMessage extends ProtocolMessage {
 
+    private Type type;
     private GameClient client;
 
-    public FriendsListMessage() { }
+    public FriendsListMessage(Type type) {
+        this.type = type;
+    }
 
-    public FriendsListMessage(GameClient client) {
+    public FriendsListMessage(Type type, GameClient client) {
+        this(type);
         this.client = client;
     }
 
     @Override
     public String serialize() {
-        List<Integer> friendsList = new ArrayList<>(client.getFriends());
+        List<Integer> list = new ArrayList<>(type.id == 'F' ? client.getFriends() : client.getEnemies());
         StringBuilder onlineBuilder = new StringBuilder();
-        Iterator<GameClient> onlineFriends = client.getServer().getClients().stream().filter(f -> client.getFriends().contains(f.getAccountId())).iterator();
-        while (onlineFriends.hasNext()) {
-            GameClient f = onlineFriends.next();
+        Iterator<GameClient> onlineList = client.getServer().getClients().stream().filter(type.id == 'F' ? f -> client.getFriends().contains(f.getAccountId()) : f -> client.getEnemies().contains(f.getAccountId())).iterator();
+        while (onlineList.hasNext()) {
+            GameClient f = onlineList.next();
             Character fChar = f.getCharacter();
             if (fChar == null) continue;
             int fId = f.getAccountId();
-            boolean mutual = f.getFriends().contains(client.getAccountId());
+            boolean mutual = (type.id == 'F' && f.getFriends().contains(client.getAccountId()));
             onlineBuilder.append('|').append(f.getNickname()).append(';');
             onlineBuilder.append(mutual ? "1" : "?").append(';'); //TODO 2 = Sword icon?
             onlineBuilder.append(fChar.getName()).append(';');
@@ -38,13 +42,11 @@ public @Data class FriendsListMessage extends ProtocolMessage {
             onlineBuilder.append(fChar.getBreed()).append(';');
             onlineBuilder.append(fChar.getGender()).append(';');
             onlineBuilder.append(fChar.getGfxId());
-            friendsList.remove(Integer.valueOf(fId));
+            list.remove(Integer.valueOf(fId));
         }
 
         StringBuilder offlineBuilder = new StringBuilder();
-        Iterator<Integer> offlineFriends = friendsList.iterator();
-        while (offlineFriends.hasNext()) {
-            int fId = offlineFriends.next();
+        for (int fId : list) {
             String fNick;
             if (client.getServer().getNicknamesCache().containsKey(fId)) {
                 fNick = client.getServer().getNicknamesCache().get(fId);
@@ -52,11 +54,10 @@ public @Data class FriendsListMessage extends ProtocolMessage {
                 fNick = client.getServer().getAuthDatabase().getDsl().select(ACCOUNTS.NICKNAME).from(ACCOUNTS).where(ACCOUNTS.ID.eq(fId)).fetchOne().value1();
                 client.getServer().getNicknamesCache().put(fId, fNick);
             }
-            offlineBuilder.append(fNick);
-            if (offlineFriends.hasNext()) offlineBuilder.append('|');
+            offlineBuilder.append('|').append(fNick);
         }
 
-        return "FL|" + offlineBuilder.toString() + onlineBuilder.toString();
+        return type.id + "L" + offlineBuilder.toString() + onlineBuilder.toString();
     }
 
     @Override
@@ -65,5 +66,20 @@ public @Data class FriendsListMessage extends ProtocolMessage {
         if (packet.length() > 2) return false;
         client.sendProtocolMessage(this);
         return true;
+    }
+
+    public enum Type {
+        FRIENDS('F'),
+        ENEMIES('i');
+
+        private final char id;
+
+        Type(char value) {
+            this.id = value;
+        }
+
+        public final char getId() {
+            return this.id;
+        }
     }
 }

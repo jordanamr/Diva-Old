@@ -32,7 +32,7 @@ public class AuthDatabase extends DivaDatabase {
     @Getter
     private CharactersDao charactersDao;
     @Getter
-    private FriendsDao friendsDao;
+    private FriendsListDao friendsDao;
 
     public AuthDatabase(String server, String username, String password, String database, int poolSize) {
         super(server, username, password, database, poolSize);
@@ -47,7 +47,7 @@ public class AuthDatabase extends DivaDatabase {
             this.ranksDao = new RanksDao(dsl.configuration());
             this.serversDao = new ServersDao(dsl.configuration());
             this.charactersDao = new CharactersDao(dsl.configuration());
-            this.friendsDao = new FriendsDao(dsl.configuration());
+            this.friendsDao = new FriendsListDao(dsl.configuration());
             log.info("Successfully connected to auth database.");
         } catch (Exception ex) {
             log.error("A fatal error occured while connecting to the auth database", ex);

@@ -33,6 +33,7 @@ public @Data class GameClient extends DivaClient {
     private String chatChannels;
     private boolean notificationsFriends;
     private List<Integer> friends;
+    private List<Integer> enemies;
 
     public GameClient(GameServer server, Client netClient, String ip) {
         super(netClient, ip);
@@ -123,13 +124,24 @@ public @Data class GameClient extends DivaClient {
                     case 'F':
                         switch (packet.charAt(1)) {
                             case 'L':
-                                return new FriendsListMessage().handle(this, packet);
+                                return new FriendsListMessage(FriendsListMessage.Type.FRIENDS).handle(this, packet);
                             case 'A':
-                                return new FriendsListAddMessage().handle(this, packet);
+                                return new FriendsListAddMessage(FriendsListMessage.Type.FRIENDS).handle(this, packet);
                             case 'D':
-                                return new FriendsListDeleteMessage().handle(this, packet);
+                                return new FriendsListDeleteMessage(FriendsListMessage.Type.FRIENDS).handle(this, packet);
                             case 'O':
                                 return new FriendsListToggleMessage().handle(this, packet);
+                            default:
+                                return false;
+                        }
+                    case 'i':
+                        switch (packet.charAt(1)) {
+                            case 'L':
+                                return new FriendsListMessage(FriendsListMessage.Type.ENEMIES).handle(this, packet);
+                            case 'A':
+                                return new FriendsListAddMessage(FriendsListMessage.Type.ENEMIES).handle(this, packet);
+                            case 'D':
+                                return new FriendsListDeleteMessage(FriendsListMessage.Type.ENEMIES).handle(this, packet);
                             default:
                                 return false;
                         }
@@ -193,5 +205,9 @@ public @Data class GameClient extends DivaClient {
         CHARACTER_SELECT,
         INGAME,
         DISCONNECTED
+    }
+
+    public boolean isSubscriber() {
+        return (remainingSubscription == -1 || remainingSubscription > 0);
     }
 }

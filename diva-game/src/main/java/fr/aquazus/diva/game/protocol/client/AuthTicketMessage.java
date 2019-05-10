@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 import static fr.aquazus.diva.database.generated.auth.Tables.CHARACTERS;
-import static fr.aquazus.diva.database.generated.auth.Tables.FRIENDS;
+import static fr.aquazus.diva.database.generated.auth.Tables.FRIENDS_LIST;
 
 public @Data class AuthTicketMessage extends ProtocolMessage {
 
@@ -52,7 +52,9 @@ public @Data class AuthTicketMessage extends ProtocolMessage {
         client.setChatChannels(accountPojo.getChatChannels());
         client.setNotificationsFriends(accountPojo.getNotificationsFriends() == (byte) 1);
         client.setFriends(Collections.synchronizedList(new ArrayList<>()));
-        client.getServer().getAuthDatabase().getDsl().select(FRIENDS.RECIPIENT_ID).from(FRIENDS).where(FRIENDS.REQUESTER_ID.eq(client.getAccountId())).iterator().forEachRemaining(record -> client.getFriends().add(record.value1()));
+        client.getServer().getAuthDatabase().getDsl().select(FRIENDS_LIST.RECIPIENT_ID).from(FRIENDS_LIST).where(FRIENDS_LIST.REQUESTER_ID.eq(client.getAccountId())).and(FRIENDS_LIST.TYPE.eq((byte) 0)).iterator().forEachRemaining(record -> client.getFriends().add(record.value1()));
+        client.setEnemies(Collections.synchronizedList(new ArrayList<>()));
+        client.getServer().getAuthDatabase().getDsl().select(FRIENDS_LIST.RECIPIENT_ID).from(FRIENDS_LIST).where(FRIENDS_LIST.REQUESTER_ID.eq(client.getAccountId())).and(FRIENDS_LIST.TYPE.eq((byte) 1)).iterator().forEachRemaining(record -> client.getEnemies().add(record.value1()));
 
         client.log("Login successful");
         client.setState(GameClient.State.CHARACTER_SELECT);

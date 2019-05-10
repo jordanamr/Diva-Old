@@ -1,22 +1,25 @@
 package fr.aquazus.diva.game.protocol.server;
 
 import fr.aquazus.diva.common.protocol.ProtocolMessage;
+import fr.aquazus.diva.game.protocol.client.FriendsListMessage;
 import lombok.Data;
 
 public @Data class FriendsListErrorMessage extends ProtocolMessage {
 
-    private Type type;
+    private FriendsListMessage.Type type;
+    private Code code;
 
-    public FriendsListErrorMessage(Type type) {
+    public FriendsListErrorMessage(FriendsListMessage.Type type, Code code) {
         this.type = type;
+        this.code = code;
     }
 
     @Override
     public String serialize() {
-        return "FAE" + type.getValue();
+        return type.getId() + "AE" + code.getValue();
     }
 
-    public enum Type {
+    public enum Code {
         CANT_ADD_FRIEND_NOT_FOUND('f'),
         CANT_ADD_YOU('y'),
         ALREADY_YOUR_FRIEND('a'),
@@ -24,11 +27,11 @@ public @Data class FriendsListErrorMessage extends ProtocolMessage {
 
         private final char value;
 
-        Type(char value) {
+        Code(char value) {
             this.value = value;
         }
 
-        public char getValue() {
+        public final char getValue() {
             return value;
         }
     }

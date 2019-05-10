@@ -8,16 +8,21 @@ import lombok.Data;
 
 import java.util.Optional;
 
-import static fr.aquazus.diva.database.generated.auth.Tables.FRIENDS;
+import static fr.aquazus.diva.database.generated.auth.Tables.FRIENDS_LIST;
 
 public @Data class FriendsListDeleteMessage extends ProtocolMessage {
 
+    private FriendsListMessage.Type type;
     private boolean isNickname;
     private String name;
 
+    public FriendsListDeleteMessage(FriendsListMessage.Type type) {
+        this.type = type;
+    }
+
     @Override
     public String serialize() {
-        return "FDK";
+        return type.getId() + "DK";
     }
 
     @Override
@@ -44,19 +49,34 @@ public @Data class FriendsListDeleteMessage extends ProtocolMessage {
         } else {
             Optional<GameClient> optionalTarget = client.getServer().getClients().stream().filter(isNickname ? c -> c.getNickname().equalsIgnoreCase(name) : (c -> c.getCharacter() != null && c.getCharacter().getName().equalsIgnoreCase(name))).findFirst();
             if (optionalTarget.isEmpty()) {
-                client.sendProtocolMessage(new FriendsListErrorMessage(FriendsListErrorMessage.Type.CANT_ADD_FRIEND_NOT_FOUND));
+                client.sendProtocolMessage(new FriendsListErrorMessage(type, FriendsListErrorMessage.Code.CANT_ADD_FRIEND_NOT_FOUND));
                 return true;
             }
             id = Optional.of(optionalTarget.get().getAccountId());
         }
         if (id.isEmpty()) {
-            client.sendProtocolMessage(new FriendsListErrorMessage(FriendsListErrorMessage.Type.CANT_ADD_FRIEND_NOT_FOUND));
+            client.sendProtocolMessage(new FriendsListErrorMessage(type, FriendsListErrorMessage.Code.CANT_ADD_FRIEND_NOT_FOUND));
             return true;
         }
         int fId = id.get();
-
-        client.getServer().getAuthDatabase().getDsl().deleteFrom(FRIENDS).where(FRIENDS.REQUESTER_ID.eq(client.getAccountId())).and(FRIENDS.RECIPIENT_ID.eq(fId)).execute();
-        client.getFriends().remove(Integer.valueOf(fId));
+        switch (type) {
+            case FRIENDS:
+                if (!client.getFriends().contains(fId)) {
+                    client.sendProtocolMessage(new FriendsListErrorMessage(type, FriendsListErrorMessage.Code.CANT_ADD_FRIEND_NOT_FOUND));
+                    return true;
+                }
+                client.getServer().getAuthDatabase().getDsl().deleteFrom(FRIENDS_LIST).where(FRIENDS_LIST.REQUESTER_ID.eq(client.getAccountId())).and(FRIENDS_LIST.RECIPIENT_ID.eq(fId)).and(FRIENDS_LIST.TYPE.eq((byte) 0)).execute();
+                client.getFriends().remove(Integer.valueOf(fId));
+                break;
+            case ENEMIES:
+                if (!client.getEnemies().contains(fId)) {
+                    client.sendProtocolMessage(new FriendsListErrorMessage(type, FriendsListErrorMessage.Code.CANT_ADD_FRIEND_NOT_FOUND));
+                    return true;
+                }
+                client.getServer().getAuthDatabase().getDsl().deleteFrom(FRIENDS_LIST).where(FRIENDS_LIST.REQUESTER_ID.eq(client.getAccountId())).and(FRIENDS_LIST.RECIPIENT_ID.eq(fId)).and(FRIENDS_LIST.TYPE.eq((byte) 1)).execute();
+                client.getEnemies().remove(Integer.valueOf(fId));
+                break;
+        }
 
         client.sendProtocolMessage(this);
 
