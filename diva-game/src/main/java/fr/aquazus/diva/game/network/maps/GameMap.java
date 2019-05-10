@@ -59,4 +59,16 @@ public class GameMap {
         }
     }
 
+    public void useAttitude(int spriteId, int id) {
+        for (Character characters : charactersOnMap) {
+            characters.getClient().sendPacket("eUK" + spriteId + "|" + id);
+        }
+    }
+
+    public void changeDirection(int spriteId, int id) {
+        for (Character characters : charactersOnMap) {
+            characters.getClient().sendPacket("eD" + spriteId + "|" + id);
+        }
+    }
+
 }

@@ -20,7 +20,7 @@ public class GameMovementMessage extends ProtocolMessage {
             if (action == Action.REMOVE) {
                 actions.add("-" + character.getId());
             } else {
-                String data = "" + action.value + character.getCellId() + ";" + 6 + ";" + 0 + ";" + character.getId() + ";" + character.getName() + ";" + character.getBreed()
+                String data = "" + action.value + character.getCellId() + ";" + 1 + ";" + 0 + ";" + character.getId() + ";" + character.getName() + ";" + character.getBreed()
                         + ";" + character.getGfxId() + "^" + 100 + ";" + character.getGender() + ";";
                 if (inFight) {
                     data += character.getLevel() + ";"; //TODO

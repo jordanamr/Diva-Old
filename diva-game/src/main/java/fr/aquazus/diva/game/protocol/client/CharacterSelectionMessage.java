@@ -78,7 +78,7 @@ public @Data class CharacterSelectionMessage extends ProtocolMessage {
             client.sendProtocolMessage(new ImMessage("0152", new SimpleDateFormat("yyyy~MM~dd~HH~mm~").format(client.getLastOnline()) + client.getLastIp()));
         }
         client.sendProtocolMessage(new ImMessage("0153", client.getIp()));
-        client.sendPacket("ILS2000");
+        client.getCharacter().startRegenTimer(2000);
         client.getCharacter().joinMap(characterToUse.getMapId(), characterToUse.getCellId());
         client.sendPacket("BT" + System.currentTimeMillis());
         client.sendPacket("fC0"); //TODO Map fight count

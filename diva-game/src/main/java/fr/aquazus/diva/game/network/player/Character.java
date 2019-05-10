@@ -9,6 +9,13 @@ import fr.aquazus.diva.game.protocol.server.MapDataMessage;
 import lombok.Data;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static fr.aquazus.diva.database.generated.auth.Tables.CHARACTERS;
 
@@ -37,6 +44,13 @@ public @Data class Character {
     private GameMap currentMap;
     private int cellId;
 
+    private List<Integer> attitudes;
+    private boolean sitting;
+
+    private ScheduledExecutorService regenScheduler;
+    private ScheduledFuture currentRegenTask;
+    private int lifeRegenerated;
+
     public Character(GameClient client, Characters pojo) {
         this.client = client;
         this.id = pojo.getId();
@@ -64,6 +78,8 @@ public @Data class Character {
 
         this.stats = new CharacterStats(this, Arrays.stream(pojo.getBaseStats().split(",")).map(Integer::parseInt).mapToInt(Integer::intValue).toArray());
         this.restrictions = new CharacterRestrictions(pojo.getRestrictions());
+
+        this.attitudes = Arrays.stream(pojo.getAttitudes().split(",")).map(Integer::parseInt).collect(Collectors.toList());
     }
 
     public int getMaxHp() {
@@ -76,7 +92,9 @@ public @Data class Character {
                 .set(CHARACTERS.CAPITAL_SPELLS, capitalSpells).set(CHARACTERS.ALIGN_ID, alignId).set(CHARACTERS.ALIGN_LEVEL, alignLevel)
                 .set(CHARACTERS.ALIGN_RANK, alignRank).set(CHARACTERS.ALIGN_HONOR, alignHonor).set(CHARACTERS.ALIGN_DISHONOR, alignDishonor)
                 .set(CHARACTERS.ALIGN_WINGS, (byte) (wingsEnabled ? 1 : 0)).set(CHARACTERS.HP, hp).set(CHARACTERS.ENERGY, energy)
-                .set(CHARACTERS.BASE_STATS, stats.getBaseStatsAsString()).set(CHARACTERS.CELL_ID, cellId).where(CHARACTERS.ID.eq(this.id)).execute();
+                .set(CHARACTERS.BASE_STATS, stats.getBaseStatsAsString()).set(CHARACTERS.CELL_ID, cellId)
+                .set(CHARACTERS.ATTITUDES, attitudes.toString().replaceAll("[\\[\\] ]", ""))
+                .where(CHARACTERS.ID.eq(this.id)).execute();
     }
 
     public void joinMap(int mapId, int cellId) {
@@ -122,5 +140,46 @@ public @Data class Character {
         if (currentMap != null) {
             currentMap.sendSmiley(this.id, id);
         }
+    }
+
+    public void useAttitude(int id) {
+        if (id == 1) {
+            sitting = !sitting;
+            if (!sitting) {
+                resetRegenTimer(2000);
+                if (currentMap != null) currentMap.useAttitude(this.id, 0);
+                return;
+            } else {
+                resetRegenTimer(1000);
+            }
+        }
+        if (currentMap != null) {
+            currentMap.useAttitude(this.id, id);
+        }
+    }
+
+    public void changeDirection(int id) {
+        if (currentMap != null) {
+            currentMap.changeDirection(this.id, id);
+        }
+    }
+
+    public void startRegenTimer(int delay) {
+        if (regenScheduler == null) regenScheduler = Executors.newSingleThreadScheduledExecutor();
+        Runnable task = () -> {
+            if (hp < getMaxHp()) { //TODO Check in fight
+                hp++;
+                lifeRegenerated++;
+            }
+        };
+        currentRegenTask = regenScheduler.scheduleAtFixedRate(task, delay, delay, TimeUnit.MILLISECONDS);
+        client.sendPacket("ILS" + delay);
+    }
+
+    public void resetRegenTimer(int delay) {
+        currentRegenTask.cancel(true);
+        client.sendPacket("ILF" + lifeRegenerated);
+        lifeRegenerated = 0;
+        startRegenTimer(delay);
     }
 }

@@ -1,9 +1,6 @@
 package fr.aquazus.diva.game.network;
 
 import fr.aquazus.diva.common.network.DivaClient;
-import fr.aquazus.diva.common.protocol.ProtocolMessage;
-import fr.aquazus.diva.database.generated.auth.tables.pojos.Accounts;
-import fr.aquazus.diva.database.generated.auth.tables.pojos.Characters;
 import fr.aquazus.diva.game.GameServer;
 import fr.aquazus.diva.common.protocol.server.ServerMessage;
 import fr.aquazus.diva.game.network.player.Character;
@@ -11,15 +8,12 @@ import fr.aquazus.diva.game.protocol.client.*;
 import fr.aquazus.diva.game.protocol.common.GameActionMessage;
 import fr.aquazus.diva.game.protocol.server.*;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import simplenet.Client;
 
 import java.sql.Timestamp;
 
 import static fr.aquazus.diva.database.generated.auth.Tables.ACCOUNTS;
-import static fr.aquazus.diva.database.generated.auth.Tables.CHARACTERS;
 
 @Slf4j
 public @Data class GameClient extends DivaClient {
@@ -100,14 +94,28 @@ public @Data class GameClient extends DivaClient {
                         return new CharacterDeletionMessage().handle(this, packet);
                     case 'S':
                         return new CharacterSelectionMessage().handle(this, packet);
+                    default:
+                        return false;
                 }
             case INGAME:
-                if (packet.startsWith("Ir")) return true;
+                if (packet.startsWith("Ir")) {
+                    sendPacket("BN");
+                    return true;
+                }
                 if (packet.equals("ping")) {
                     sendPacket("pong");
                     return true;
                 }
                 switch (packet.charAt(0)) {
+                    case 'e':
+                        switch (packet.charAt(1)) {
+                            case 'U':
+                                return new AttitudeMessage().handle(this, packet);
+                            case 'D':
+                                return new DirectionMessage().handle(this, packet);
+                            default:
+                                return false;
+                        }
                     case 'B':
                         switch (packet.charAt(1)) {
                             case 'D':
@@ -117,6 +125,8 @@ public @Data class GameClient extends DivaClient {
                                 return new ChatMessage().handle(this, packet);
                             case 'S':
                                 return new SmileyMessage().handle(this, packet);
+                            default:
+                                return false;
                         }
                     case 'G':
                         switch (packet.charAt(1)) {
@@ -140,8 +150,14 @@ public @Data class GameClient extends DivaClient {
                                         return true;
                                     case 'E':
                                         return new GameActionCancelMessage().handle(this, packet);
+                                    default:
+                                        return false;
                                 }
+                            default:
+                                return false;
                         }
+                    default:
+                        return false;
                 }
         }
         return false;

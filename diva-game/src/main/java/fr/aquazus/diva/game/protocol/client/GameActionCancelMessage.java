@@ -10,7 +10,7 @@ public @Data class GameActionCancelMessage extends ProtocolMessage {
 
     @Override
     public boolean handle(DivaClient netClient, String packet) {
-        if (packet.length() < 7 || !packet.contains("\\|")) return false;
+        if (packet.length() < 7 || !packet.contains("|")) return false;
         GameClient client = (GameClient) netClient;
         String[] extraData = packet.substring(3).split("\\|");
         int actionId = Integer.parseInt(extraData[0]);
