@@ -80,6 +80,8 @@ public @Data class Character {
         this.restrictions = new CharacterRestrictions(pojo.getRestrictions());
 
         this.attitudes = Arrays.stream(pojo.getAttitudes().split(",")).map(Integer::parseInt).collect(Collectors.toList());
+
+
     }
 
     public int getMaxHp() {

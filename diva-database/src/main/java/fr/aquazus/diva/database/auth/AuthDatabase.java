@@ -1,10 +1,7 @@
 package fr.aquazus.diva.database.auth;
 
 import fr.aquazus.diva.database.DivaDatabase;
-import fr.aquazus.diva.database.generated.auth.tables.daos.AccountsDao;
-import fr.aquazus.diva.database.generated.auth.tables.daos.CharactersDao;
-import fr.aquazus.diva.database.generated.auth.tables.daos.RanksDao;
-import fr.aquazus.diva.database.generated.auth.tables.daos.ServersDao;
+import fr.aquazus.diva.database.generated.auth.tables.daos.*;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.jooq.DSLContext;
@@ -34,6 +31,8 @@ public class AuthDatabase extends DivaDatabase {
     private ServersDao serversDao;
     @Getter
     private CharactersDao charactersDao;
+    @Getter
+    private FriendsDao friendsDao;
 
     public AuthDatabase(String server, String username, String password, String database, int poolSize) {
         super(server, username, password, database, poolSize);
@@ -48,6 +47,7 @@ public class AuthDatabase extends DivaDatabase {
             this.ranksDao = new RanksDao(dsl.configuration());
             this.serversDao = new ServersDao(dsl.configuration());
             this.charactersDao = new CharactersDao(dsl.configuration());
+            this.friendsDao = new FriendsDao(dsl.configuration());
             log.info("Successfully connected to auth database.");
         } catch (Exception ex) {
             log.error("A fatal error occured while connecting to the auth database", ex);

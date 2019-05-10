@@ -49,12 +49,15 @@ public class GameServer extends DivaServer {
     private GameRedis redis;
     @Getter
     private MapsManager mapsManager;
+    @Getter
+    private Map<Integer, String> nicknamesCache;
 
     private GameServer() {
         state = ServerState.OFFLINE;
         config = new GameConfiguration("game.properties");
         ticketsCache = Collections.synchronizedMap(new HashMap<>());
         clients = Collections.synchronizedList(new ArrayList<>());
+        nicknamesCache = Collections.synchronizedMap(new HashMap<>());
         gameCipher = new GameCipher();
         mapsManager = new MapsManager(this);
     }

@@ -7,7 +7,11 @@ import fr.aquazus.diva.database.generated.auth.tables.pojos.Accounts;
 import fr.aquazus.diva.game.network.GameClient;
 import lombok.Data;
 
+import java.util.ArrayList;
+import java.util.Collections;
+
 import static fr.aquazus.diva.database.generated.auth.Tables.CHARACTERS;
+import static fr.aquazus.diva.database.generated.auth.Tables.FRIENDS;
 
 public @Data class AuthTicketMessage extends ProtocolMessage {
 
@@ -39,6 +43,7 @@ public @Data class AuthTicketMessage extends ProtocolMessage {
         client.getServer().getTicketsCache().remove(ticketData);
 
         Accounts accountPojo = client.getServer().getAuthDatabase().getAccountsDao().fetchOneById(client.getAccountId());
+        client.setNickname(accountPojo.getNickname());
         client.setRemainingSubscription(accountPojo.getRemainingSubscription());
         client.setSecretAnswer(accountPojo.getSecretAnswer());
         client.setCharacterCount(client.getServer().getAuthDatabase().getDsl().selectFrom(CHARACTERS).where(CHARACTERS.ACCOUNT_ID.eq(client.getAccountId())).execute());
@@ -46,6 +51,8 @@ public @Data class AuthTicketMessage extends ProtocolMessage {
         client.setLastOnline(accountPojo.getLastOnline());
         client.setChatChannels(accountPojo.getChatChannels());
         client.setNotificationsFriends(accountPojo.getNotificationsFriends() == (byte) 1);
+        client.setFriends(Collections.synchronizedList(new ArrayList<>()));
+        client.getServer().getAuthDatabase().getDsl().select(FRIENDS.RECIPIENT_ID).from(FRIENDS).where(FRIENDS.REQUESTER_ID.eq(client.getAccountId())).iterator().forEachRemaining(record -> client.getFriends().add(record.value1()));
 
         client.log("Login successful");
         client.setState(GameClient.State.CHARACTER_SELECT);

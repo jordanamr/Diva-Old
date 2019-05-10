@@ -5,6 +5,7 @@ import fr.aquazus.diva.game.GameServer;
 import fr.aquazus.diva.common.protocol.server.ServerMessage;
 import fr.aquazus.diva.game.network.player.Character;
 import fr.aquazus.diva.game.protocol.client.*;
+import fr.aquazus.diva.game.protocol.client.FriendsListMessage;
 import fr.aquazus.diva.game.protocol.common.GameActionMessage;
 import fr.aquazus.diva.game.protocol.server.*;
 import lombok.Data;
@@ -12,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import simplenet.Client;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 import static fr.aquazus.diva.database.generated.auth.Tables.ACCOUNTS;
 
@@ -21,6 +23,7 @@ public @Data class GameClient extends DivaClient {
     private final GameServer server;
     private State state;
     private int accountId;
+    private String nickname;
     private int remainingSubscription;
     private int characterCount;
     private String secretAnswer;
@@ -29,6 +32,7 @@ public @Data class GameClient extends DivaClient {
     private Character character;
     private String chatChannels;
     private boolean notificationsFriends;
+    private List<Integer> friends;
 
     public GameClient(GameServer server, Client netClient, String ip) {
         super(netClient, ip);
@@ -113,6 +117,19 @@ public @Data class GameClient extends DivaClient {
                                 return new AttitudeMessage().handle(this, packet);
                             case 'D':
                                 return new DirectionMessage().handle(this, packet);
+                            default:
+                                return false;
+                        }
+                    case 'F':
+                        switch (packet.charAt(1)) {
+                            case 'L':
+                                return new FriendsListMessage().handle(this, packet);
+                            case 'A':
+                                return new FriendsListAddMessage().handle(this, packet);
+                            case 'D':
+                                return new FriendsListDeleteMessage().handle(this, packet);
+                            case 'O':
+                                return new FriendsListToggleMessage().handle(this, packet);
                             default:
                                 return false;
                         }
