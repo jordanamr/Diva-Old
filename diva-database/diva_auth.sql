@@ -11,7 +11,7 @@
  Target Server Version : 100138
  File Encoding         : 65001
 
- Date: 15/04/2019 01:55:34
+ Date: 11/05/2019 01:31:09
 */
 
 SET NAMES utf8mb4;
@@ -38,12 +38,14 @@ CREATE TABLE `accounts`  (
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `username`(`username`) USING BTREE,
   UNIQUE INDEX `nickname`(`nickname`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Compact;
+) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Compact;
 
 -- ----------------------------
 -- Records of accounts
 -- ----------------------------
-INSERT INTO `accounts` VALUES (1, 'test', 'test', 'test', 'Supprimer ?', 'oui', -1, 1, 0, NULL, NULL, '*#%!$:?pi', 1);
+INSERT INTO `accounts` VALUES (1, 'test', 'test', 'test', 'Supprimer ?', 'oui', -1, 1, 0, '127.0.0.1', '2019-05-11 01:30:25', '*#%!$:?pi', 1);
+INSERT INTO `accounts` VALUES (2, 'test2', 'test2', 'test2', 'Supprimer ?', 'oui', -1, 1, 0, '127.0.0.1', '2019-05-11 01:28:51', '*#%!$:?pi', 1);
+INSERT INTO `accounts` VALUES (3, 'test3', 'test3', 'test3', 'Supprimer ?', 'oui', -1, 1, 0, NULL, NULL, '*#%!$:?pi', 1);
 
 -- ----------------------------
 -- Table structure for characters
@@ -78,10 +80,41 @@ CREATE TABLE `characters`  (
   `base_stats` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '0,0,0,0,0,0',
   `map_id` int(11) NOT NULL,
   `cell_id` int(11) NOT NULL,
+  `attitudes` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`, `account_id`) USING BTREE,
   UNIQUE INDEX `name`(`name`) USING BTREE,
   UNIQUE INDEX `id`(`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Compact;
+) ENGINE = InnoDB AUTO_INCREMENT = 7 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Compact;
+
+-- ----------------------------
+-- Records of characters
+-- ----------------------------
+INSERT INTO `characters` VALUES (1, 1, 900, 'Bg-sombre', 4, 0, 40, -1, -1, -1, 1, 0, 55, 10000, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8192, '0,0,0,0,0,0', 7573, 213, '1');
+INSERT INTO `characters` VALUES (2, 1, 900, 'Morsay', 11, 0, 110, -1, -1, 15435545, 1, 0, 55, 10000, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8192, '0,0,0,0,0,0', 7573, 241, '1');
+INSERT INTO `characters` VALUES (3, 1, 900, 'Tocslamarure', 3, 0, 30, -1, -1, -1, 1, 0, 55, 10000, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8192, '0,0,0,0,0,0', 7573, 241, '1');
+INSERT INTO `characters` VALUES (4, 1, 900, 'Pute', 4, 1, 41, -1, -1, -1, 1, 0, 55, 10000, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8192, '0,0,0,0,0,0', 7573, 258, '1');
+INSERT INTO `characters` VALUES (5, 1, 900, 'Acety-Homme', 6, 0, 60, -1, -1, -1, 1, 0, 55, 10000, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8192, '0,0,0,0,0,0', 7573, 323, '1');
+INSERT INTO `characters` VALUES (6, 2, 900, 'Jag-Ksosakai', 6, 1, 61, -1, -1, -1, 1, 0, 55, 10000, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8192, '0,0,0,0,0,0', 7573, 244, '1');
+
+-- ----------------------------
+-- Table structure for friends_list
+-- ----------------------------
+DROP TABLE IF EXISTS `friends_list`;
+CREATE TABLE `friends_list`  (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `requester_id` int(11) NOT NULL,
+  `recipient_id` int(11) NOT NULL,
+  `type` tinyint(1) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 13 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Compact;
+
+-- ----------------------------
+-- Records of friends_list
+-- ----------------------------
+INSERT INTO `friends_list` VALUES (9, 1, 2, 1);
+INSERT INTO `friends_list` VALUES (10, 1, 2, 0);
+INSERT INTO `friends_list` VALUES (11, 2, 1, 0);
+INSERT INTO `friends_list` VALUES (12, 2, 1, 1);
 
 -- ----------------------------
 -- Table structure for ranks
