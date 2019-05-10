@@ -28,47 +28,35 @@ public class GameMap {
 
     public void addCharacter(Character character) {
         charactersOnMap.add(character);
-        for (Character characters : charactersOnMap) {
-            if (characters.getId() == character.getId()) continue;
-            characters.getClient().sendProtocolMessage(new GameMovementMessage(this, GameMovementMessage.Action.ADD, character));
-        }
+        charactersOnMap.forEach(c -> {
+            if (c.getId() == character.getId()) return;
+            c.getClient().sendProtocolMessage(new GameMovementMessage(this, GameMovementMessage.Action.ADD, character));
+        });
     }
 
     public void removeCharacter(Character character) {
         charactersOnMap.remove(character);
-        for (Character characters : charactersOnMap) {
-            characters.getClient().sendProtocolMessage(new GameMovementMessage(this, GameMovementMessage.Action.REMOVE, character));
-        }
+        charactersOnMap.forEach(c -> c.getClient().sendProtocolMessage(new GameMovementMessage(this, GameMovementMessage.Action.REMOVE, character)));
     }
 
     public void moveCharacter(Character character, String path) {
-        for (Character characters : charactersOnMap) {
-            characters.getClient().sendProtocolMessage(new GameActionMessage(GameActionMessage.Action.MOVEMENT, character.getId() + ";" + path));
-        }
+        charactersOnMap.forEach(c -> c.getClient().sendProtocolMessage(new GameActionMessage(GameActionMessage.Action.MOVEMENT, character.getId() + ";" + path)));
     }
 
     public void sendMessage(Character character, String message) {
-        for (Character characters : charactersOnMap) {
-            characters.getClient().sendPacket("cMK|" + character.getId() + "|" + character.getName() + "|" + message + "|");
-        }
+        charactersOnMap.forEach(c -> c.getClient().sendPacket("cMK|" + character.getId() + "|" + character.getName() + "|" + message + "|"));
     }
 
     public void sendSmiley(int spriteId, int id) {
-        for (Character characters : charactersOnMap) {
-            characters.getClient().sendPacket("cS" + spriteId + "|" + id);
-        }
+        charactersOnMap.forEach(c -> c.getClient().sendPacket("cS" + spriteId + "|" + id));
     }
 
     public void useAttitude(int spriteId, int id) {
-        for (Character characters : charactersOnMap) {
-            characters.getClient().sendPacket("eUK" + spriteId + "|" + id);
-        }
+        charactersOnMap.forEach(c -> c.getClient().sendPacket("eUK" + spriteId + "|" + id));
     }
 
     public void changeDirection(int spriteId, int id) {
-        for (Character characters : charactersOnMap) {
-            characters.getClient().sendPacket("eD" + spriteId + "|" + id);
-        }
+        charactersOnMap.forEach(c -> c.getClient().sendPacket("eD" + spriteId + "|" + id));
     }
 
 }
