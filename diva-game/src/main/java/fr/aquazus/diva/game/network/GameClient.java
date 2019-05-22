@@ -5,8 +5,8 @@ import fr.aquazus.diva.game.GameServer;
 import fr.aquazus.diva.common.protocol.server.ServerMessage;
 import fr.aquazus.diva.game.network.player.Character;
 import fr.aquazus.diva.game.protocol.client.*;
-import fr.aquazus.diva.game.protocol.client.FriendsListMessage;
-import fr.aquazus.diva.game.protocol.common.GameActionMessage;
+import fr.aquazus.diva.game.protocol.common.*;
+import fr.aquazus.diva.game.protocol.server.FriendsListMessage;
 import fr.aquazus.diva.game.protocol.server.*;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -111,6 +111,22 @@ public @Data class GameClient extends DivaClient {
                     sendPacket("pong");
                     return true;
                 }
+                if (packet.equals("QL")) {
+                    sendPacket("QL"); //TODO Quests
+                    return true;
+                }
+                if (packet.equals("CWJ")) {
+                    sendPacket("CW"); //TODO WorldMapData
+                    return true;
+                }
+                if (packet.equals("CWV")) {
+                    sendPacket("BN"); //TODO WorldMapData
+                    return true;
+                }
+                if (packet.startsWith("BaM")) {
+                    sendPacket("BN"); //TODO WorldMapData
+                    return true;
+                }
                 switch (packet.charAt(0)) {
                     case 'e':
                         switch (packet.charAt(1)) {
@@ -152,6 +168,8 @@ public @Data class GameClient extends DivaClient {
                                 return true;
                             case 'M':
                                 return new ChatMessage().handle(this, packet);
+                            case 'W':
+                                return new WhoisMessage().handle(this, packet);
                             case 'S':
                                 return new SmileyMessage().handle(this, packet);
                             default:
