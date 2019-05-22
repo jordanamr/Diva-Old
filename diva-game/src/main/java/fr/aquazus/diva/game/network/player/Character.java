@@ -6,6 +6,7 @@ import fr.aquazus.diva.game.network.maps.GameMap;
 import fr.aquazus.diva.game.protocol.client.ChatMessage;
 import fr.aquazus.diva.game.protocol.server.GameMovementMessage;
 import fr.aquazus.diva.game.protocol.server.MapDataMessage;
+import fr.aquazus.diva.game.protocol.server.TimeMessage;
 import lombok.Data;
 
 import java.util.Arrays;
@@ -103,6 +104,7 @@ public @Data class Character {
         leaveCurrentMap();
         currentMap = client.getServer().getMapsManager().getMap(mapId);
         client.sendProtocolMessage(new MapDataMessage(currentMap));
+        client.sendProtocolMessage(new TimeMessage());
         this.cellId = cellId;
         currentMap.addCharacter(this);
     }
