@@ -33,8 +33,6 @@ public class AuthServer extends DivaServer {
     @Getter
     private final List<AuthClient> clients;
     @Getter
-    private final AuthCipher cipher;
-    @Getter
     private AuthDatabase database;
     @Getter
     private AuthRedis redis;
@@ -46,7 +44,6 @@ public class AuthServer extends DivaServer {
     private AuthServer() {
         config = new AuthConfiguration("auth.properties");
         clients = Collections.synchronizedList(new ArrayList<>());
-        cipher = new AuthCipher();
         serversCache = Collections.synchronizedMap(new HashMap<>());
         serversIpCache = Collections.synchronizedMap(new HashMap<>());
     }

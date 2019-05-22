@@ -12,7 +12,6 @@ public @Data class GameActionMessage extends ProtocolMessage {
 
     private Action action;
     private Object actionData;
-    private GameCipher cipher = GameCipher.getInstance();
 
     public GameActionMessage() { }
 
@@ -37,7 +36,7 @@ public @Data class GameActionMessage extends ProtocolMessage {
         if (action == null) return null;
         switch (action) {
             case MOVEMENT:
-                actionData = cipher.extractFullPath(data.substring(3), 5000);
+                actionData = GameCipher.extractFullPath(data.substring(3), 5000);
                 return this;
             default:
                 return null;
@@ -81,6 +80,6 @@ public @Data class GameActionMessage extends ProtocolMessage {
         LinkedHashMap<Integer, Integer> newPath = new LinkedHashMap<>();
         newPath.put(startCell, 0);
         newPath.putAll((LinkedHashMap<Integer, Integer>) actionData);
-        return newPath.entrySet().toArray()[newPath.size() - 1] + "|" + cipher.compressFullPath(newPath);
+        return newPath.entrySet().toArray()[newPath.size() - 1] + "|" + GameCipher.compressFullPath(newPath);
     }
 }

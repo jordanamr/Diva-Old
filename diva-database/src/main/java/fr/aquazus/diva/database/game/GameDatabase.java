@@ -56,7 +56,7 @@ public class GameDatabase extends DivaDatabase {
         log.info("Loading maps...");
         mapsData = Collections.synchronizedMap(new HashMap<>());
         for (MapsRecord mapRecord : dsl.selectFrom(MAPS).fetch()) {
-            mapsData.put(mapRecord.getId(), new String[]{mapRecord.getDate(), mapRecord.getKey()});
+            mapsData.put(mapRecord.getId(), new String[]{mapRecord.getDate(), "" + mapRecord.getWidth(), "" + mapRecord.getHeight(), mapRecord.getKey()});
         }
     }
 

@@ -40,8 +40,6 @@ public class GameServer extends DivaServer {
     @Getter
     private final List<GameClient> clients;
     @Getter
-    private GameCipher gameCipher;
-    @Getter
     private AuthDatabase authDatabase;
     @Getter
     private GameDatabase gameDatabase;
@@ -58,7 +56,6 @@ public class GameServer extends DivaServer {
         ticketsCache = Collections.synchronizedMap(new HashMap<>());
         clients = Collections.synchronizedList(new ArrayList<>());
         nicknamesCache = Collections.synchronizedMap(new HashMap<>());
-        gameCipher = new GameCipher();
         mapsManager = new MapsManager(this);
     }
 

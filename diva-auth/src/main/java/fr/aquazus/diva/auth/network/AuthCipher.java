@@ -4,17 +4,17 @@ import fr.aquazus.diva.common.network.DivaCipher;
 
 import java.util.concurrent.ThreadLocalRandom;
 
-public class AuthCipher extends DivaCipher {
+public class AuthCipher {
 
-    private final String ticketChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+    private static final String ticketChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
-    public String decodePassword(String password, String key) {
+    public static String decodePassword(String password, String key) {
         if (password.startsWith("#1")) password = password.substring(2);
         StringBuilder builder = new StringBuilder();
         for (int i = 0; i < password.length(); i += 2) {
             char keyChar = key.charAt(i / 2);
-            int index1 = zkArray.indexOf(password.charAt(i)) + zkArray.size();
-            int index2 = zkArray.indexOf(password.charAt(i + 1)) + zkArray.size();
+            int index1 = DivaCipher.zkArray.indexOf(password.charAt(i)) + DivaCipher.zkArray.size();
+            int index2 = DivaCipher.zkArray.indexOf(password.charAt(i + 1)) + DivaCipher.zkArray.size();
 
             int decodedIndex1 = index1 - (int) keyChar;
             if (decodedIndex1 < 0) decodedIndex1 += 64;
@@ -28,7 +28,7 @@ public class AuthCipher extends DivaCipher {
         return builder.toString();
     }
 
-    public String encodeAXK(String ipPort) {
+    public static String encodeAXK(String ipPort) {
         int index = ipPort.indexOf(':');
         int ip = ip2int(ipPort.substring(0, index));
         int port = Integer.parseInt(ipPort.substring(index + 1));
@@ -42,13 +42,13 @@ public class AuthCipher extends DivaCipher {
         char[] obfPort = new char[3];
         for (int i = 0; i < 3; i++) {
             int pos = 6 * (2 - i);
-            obfPort[i] = encode64((port >> pos) & 63);
+            obfPort[i] = DivaCipher.encode64((port >> pos) & 63);
         }
 
         return new String(obfIp) + new String(obfPort);
     }
 
-    private int ip2int(String ip) {
+    private static int ip2int(String ip) {
         String[] parts = ip.split("\\.");
         int iip = 0;
         for (int i = 0; i < parts.length; i++) {
@@ -57,7 +57,7 @@ public class AuthCipher extends DivaCipher {
         return iip;
     }
 
-    public String generateTicket() {
+    public static String generateTicket() {
         StringBuilder builder = new StringBuilder(11);
         for (int i = 0; i < builder.capacity(); i++) {
             builder.append(ticketChars.charAt(ThreadLocalRandom.current().nextInt(ticketChars.length())));

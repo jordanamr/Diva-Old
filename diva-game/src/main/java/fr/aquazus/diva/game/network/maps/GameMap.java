@@ -16,13 +16,17 @@ public class GameMap {
     private int id;
     @Getter
     private String date, key;
+    @Getter
+    private int width, height;
 
     @Getter
     private List<Character> charactersOnMap;
 
-    public GameMap(int id, String date, String key) {
+    GameMap(int id, String date, int width, int height, String key) {
         this.id = id;
         this.date = date;
+        this.width = width;
+        this.height = height;
         this.key = key;
         this.charactersOnMap = Collections.synchronizedList(new ArrayList<>());
     }

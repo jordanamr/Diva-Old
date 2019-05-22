@@ -22,7 +22,7 @@ public class MapsManager {
         }
         String[] mapData = server.getGameDatabase().getMapsData().get(id);
         if (mapData != null && mapData.length > 1) {
-            GameMap map = new GameMap(id, mapData[0], mapData[1]);
+            GameMap map = new GameMap(id, mapData[0], Integer.parseInt(mapData[1]), Integer.parseInt(mapData[2]), mapData[3]);
             loadedMaps.put(id, map);
             return map;
         }

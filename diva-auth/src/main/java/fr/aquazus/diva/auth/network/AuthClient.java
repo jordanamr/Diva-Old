@@ -76,7 +76,7 @@ public class AuthClient extends DivaClient implements DivaProtocol {
                 String password = extraData[1];
                 if (username == null || username.isEmpty() || password == null || password.isEmpty()) return false;
                 if (!password.startsWith("#1")) return false;
-                password = server.getCipher().decodePassword(password, authKey);
+                password = AuthCipher.decodePassword(password, authKey);
                 Accounts accountPojo = server.getDatabase().getAccountsDao().fetchOneByUsername(username);
                 if (accountPojo == null) {
                     sendProtocolMessage(new AuthErrorMessage(AuthErrorMessage.Type.BAD_LOGIN));
@@ -170,9 +170,9 @@ public class AuthClient extends DivaClient implements DivaProtocol {
                 if (serverInstance.getState() != AuthServersMessage.ServerState.ONLINE || !server.getServersIpCache().containsKey(serverId)) {
                     sendProtocolMessage(new AuthConnectErrorMessage(AuthConnectErrorMessage.Type.NOT_AVAILABLE));
                 }
-                String ticket = server.getCipher().generateTicket();
+                String ticket = AuthCipher.generateTicket();
                 server.getRedis().setTicket(serverId, accountId, ip, ticket);
-                String encryptedAddress = server.getCipher().encodeAXK(server.getServersIpCache().get(serverId));
+                String encryptedAddress = AuthCipher.encodeAXK(server.getServersIpCache().get(serverId));
                 sendProtocolMessage(new AuthAddressMessage(encryptedAddress, ticket));
                 return true;
         }
