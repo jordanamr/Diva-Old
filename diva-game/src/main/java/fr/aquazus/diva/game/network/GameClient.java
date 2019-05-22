@@ -164,7 +164,7 @@ public @Data class GameClient extends DivaClient {
                     case 'B':
                         switch (packet.charAt(1)) {
                             case 'D':
-                                sendProtocolMessage(new DateTimeMessage());
+                                sendProtocolMessage(new DateMessage());
                                 return true;
                             case 'M':
                                 return new ChatMessage().handle(this, packet);

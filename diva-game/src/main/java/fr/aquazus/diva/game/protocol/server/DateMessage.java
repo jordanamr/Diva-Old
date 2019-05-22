@@ -5,13 +5,13 @@ import fr.aquazus.diva.game.network.player.Character;
 
 import java.time.LocalDate;
 
-public class DateTimeMessage extends ProtocolMessage {
+public class DateMessage extends ProtocolMessage {
 
     private int day;
     private int month;
     private int year;
 
-    public DateTimeMessage() {
+    public DateMessage() {
         LocalDate localDate = LocalDate.now();
         this.day = localDate.getDayOfMonth();
         this.month = localDate.getMonthValue();
