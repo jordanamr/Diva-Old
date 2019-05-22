@@ -168,6 +168,7 @@ public @Data class Character {
         }
     }
 
+    //TODO Optimize
     public void startRegenTimer(int delay) {
         if (regenScheduler == null) regenScheduler = Executors.newSingleThreadScheduledExecutor();
         Runnable task = () -> {

@@ -48,8 +48,12 @@ public @Data class ChatMessage extends ProtocolMessage {
                 return true;
             }
             GameClient target = optionalTarget.get();
-            client.sendPacket("cMKT|" + client.getAccountId() + "|" + target.getCharacter().getName() + "|" + message + "|");
-            target.sendPacket("cMKF|" + target.getAccountId() + "|" + client.getCharacter().getName() + "|" + message + "|");
+            if (client.isChannelEnabled(Channel.WHISPER)) {
+                client.sendPacket("cMKT|" + client.getAccountId() + "|" + target.getCharacter().getName() + "|" + message + "|");
+                if (target.isChannelEnabled(Channel.WHISPER)) {
+                    target.sendPacket("cMKF|" + target.getAccountId() + "|" + client.getCharacter().getName() + "|" + message + "|");
+                }
+            }
         } else {
             client.getCharacter().talk(channel, message);
         }
@@ -58,7 +62,16 @@ public @Data class ChatMessage extends ProtocolMessage {
     }
 
     public enum Channel {
-        GENERAL('*');
+        INFO('i'),
+        GENERAL('*'),
+        WHISPER('#'),
+        PARTY('$'),
+        TEAM('p'),
+        GUILD('%'),
+        ALIGNMENT('!'),
+        RECRUITMENT('?'),
+        TRADE(':'),
+        ADMIN('@');
 
         private final char id;
 

@@ -111,6 +111,9 @@ public @Data class GameClient extends DivaClient {
                     sendPacket("pong");
                     return true;
                 }
+                if (packet.startsWith("cC")) {
+                    return new ChannelToggleMessage().handle(this, packet);
+                }
                 if (packet.equals("QL")) {
                     sendPacket("QL"); //TODO Quests
                     return true;
@@ -215,6 +218,20 @@ public @Data class GameClient extends DivaClient {
                 .set(ACCOUNTS.LAST_ONLINE, new Timestamp(System.currentTimeMillis()))
                 .set(ACCOUNTS.CHAT_CHANNELS, this.chatChannels).set(ACCOUNTS.NOTIFICATIONS_FRIENDS, (byte) (notificationsFriends ? 1 : 0))
                 .where(ACCOUNTS.ID.eq(this.accountId)).execute();
+    }
+
+    public boolean isChannelEnabled(ChatMessage.Channel channel) {
+        return chatChannels.indexOf(channel.getId()) >= 0;
+    }
+
+    public void enableChannel(ChatMessage.Channel channel) {
+        if (isChannelEnabled(channel)) return;
+        chatChannels += channel.getId();
+    }
+
+    public void disableChannel(ChatMessage.Channel channel) {
+        if (!isChannelEnabled(channel)) return;
+        chatChannels = chatChannels.replace("" + channel.getId(), "");
     }
 
     public enum State {

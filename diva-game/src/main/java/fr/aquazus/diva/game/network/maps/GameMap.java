@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 import fr.aquazus.diva.game.network.player.Character;
+import fr.aquazus.diva.game.protocol.client.ChatMessage;
 import fr.aquazus.diva.game.protocol.common.GameActionMessage;
 import fr.aquazus.diva.game.protocol.server.GameMovementMessage;
 import lombok.Getter;
@@ -44,7 +45,10 @@ public class GameMap {
     }
 
     public void sendMessage(Character character, String message) {
-        charactersOnMap.forEach(c -> c.getClient().sendPacket("cMK|" + character.getId() + "|" + character.getName() + "|" + message + "|"));
+        charactersOnMap.forEach(c -> {
+            if (!c.getClient().isChannelEnabled(ChatMessage.Channel.GENERAL)) return;
+            c.getClient().sendPacket("cMK|" + character.getId() + "|" + character.getName() + "|" + message + "|");
+        });
     }
 
     public void sendSmiley(int spriteId, int id) {
