@@ -1,4 +1,4 @@
-package fr.aquazus.diva.game.protocol.client;
+package fr.aquazus.diva.game.protocol.server;
 
 import fr.aquazus.diva.common.network.DivaClient;
 import fr.aquazus.diva.common.protocol.ProtocolMessage;

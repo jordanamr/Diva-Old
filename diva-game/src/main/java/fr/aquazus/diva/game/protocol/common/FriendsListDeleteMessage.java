@@ -1,9 +1,10 @@
-package fr.aquazus.diva.game.protocol.client;
+package fr.aquazus.diva.game.protocol.common;
 
 import fr.aquazus.diva.common.network.DivaClient;
 import fr.aquazus.diva.common.protocol.ProtocolMessage;
 import fr.aquazus.diva.game.network.GameClient;
 import fr.aquazus.diva.game.protocol.server.FriendsListErrorMessage;
+import fr.aquazus.diva.game.protocol.server.FriendsListMessage;
 import lombok.Data;
 
 import java.util.Optional;

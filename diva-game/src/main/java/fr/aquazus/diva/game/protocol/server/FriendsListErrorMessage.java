@@ -1,7 +1,6 @@
 package fr.aquazus.diva.game.protocol.server;
 
 import fr.aquazus.diva.common.protocol.ProtocolMessage;
-import fr.aquazus.diva.game.protocol.client.FriendsListMessage;
 import lombok.Data;
 
 public @Data class FriendsListErrorMessage extends ProtocolMessage {
