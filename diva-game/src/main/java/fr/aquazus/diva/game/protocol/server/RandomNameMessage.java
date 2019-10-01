@@ -2,7 +2,7 @@ package fr.aquazus.diva.game.protocol.server;
 
 import fr.aquazus.diva.common.protocol.ProtocolMessage;
 
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class RandomNameMessage extends ProtocolMessage {
 
@@ -35,7 +35,7 @@ public class RandomNameMessage extends ProtocolMessage {
             "ksosakai", "terpe", "jepe", "galos", "warre", "catakk", "alor" };
 
     private static String generateName() {
-        Random random = new Random();
+        ThreadLocalRandom random = ThreadLocalRandom.current();
         String prefix = prefixes[random.nextInt(prefixes.length)];
         String middle = middles[random.nextInt(middles.length)];
         String suffix = suffixes[random.nextInt(suffixes.length)];
